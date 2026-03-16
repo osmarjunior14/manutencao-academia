@@ -37,9 +37,11 @@
 
 </div>
 
-<div class="card shadow">
+<div class="card shadow mb-5">
 
 <div class="card-body">
+
+<h5>Manutenções em aberto</h5>
 
 <table class="table table-striped table-hover">
 
@@ -50,12 +52,41 @@
 <th>Problema</th>
 <th>Data</th>
 <th>Status</th>
-<th>Ação</th>
+<th>Ações</th>
 </tr>
 
 </thead>
 
-<tbody id="tabela"></tbody>
+<tbody id="tabelaAbertos"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<div class="card shadow">
+
+<div class="card-body">
+
+<h5>Histórico de manutenções resolvidas</h5>
+
+<table class="table table-striped table-hover">
+
+<thead class="table-secondary">
+
+<tr>
+<th>Máquina</th>
+<th>Problema</th>
+<th>Data</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+
+</thead>
+
+<tbody id="tabelaResolvidos"></tbody>
 
 </table>
 
@@ -69,10 +100,13 @@
 
 <script>
 
+const senhaAdmin = "7c9446a1"
+
 const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co"
 const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
+
 
 const maquinas = {
 
@@ -184,6 +218,7 @@ const maquinas = {
 
 }
 
+
 let manutencoes = []
 
 async function carregar(){
@@ -199,13 +234,16 @@ render()
 
 }
 
+
 function render(){
 
 let filtro = document.getElementById("filtro").value.toLowerCase()
 
-let tabela = document.getElementById("tabela")
+let tabelaAbertos = document.getElementById("tabelaAbertos")
+let tabelaResolvidos = document.getElementById("tabelaResolvidos")
 
-tabela.innerHTML=""
+tabelaAbertos.innerHTML=""
+tabelaResolvidos.innerHTML=""
 
 let abertas = 0
 
@@ -216,15 +254,15 @@ const maquina = nome + " - " + item.maquina_id
 
 if(!maquina.toLowerCase().includes(filtro)) return
 
-if(item.status==="aberto") abertas++
-
 let statusCor = item.status==="aberto"
 ? `<span class="badge bg-danger">ABERTO</span>`
 : `<span class="badge bg-success">RESOLVIDO</span>`
 
-let botao = item.status==="aberto"
-? `<button class="btn btn-sm btn-success" onclick="resolver('${item.id}')">Resolver</button>`
+let resolverBtn = item.status==="aberto"
+? `<button class="btn btn-sm btn-success me-2" onclick="resolver('${item.id}')">Resolver</button>`
 : ""
+
+let apagarBtn = `<button class="btn btn-sm btn-danger" onclick="apagar('${item.id}')">Apagar</button>`
 
 let linha = `
 <tr>
@@ -232,17 +270,27 @@ let linha = `
 <td>${item.descricao}</td>
 <td>${new Date(item.data).toLocaleString()}</td>
 <td>${statusCor}</td>
-<td>${botao}</td>
+<td>${resolverBtn}${apagarBtn}</td>
 </tr>
 `
 
-tabela.innerHTML+=linha
+if(item.status==="aberto"){
+
+tabelaAbertos.innerHTML+=linha
+abertas++
+
+}else{
+
+tabelaResolvidos.innerHTML+=linha
+
+}
 
 })
 
 document.getElementById("contador").innerText = abertas
 
 }
+
 
 async function resolver(id){
 
@@ -272,6 +320,32 @@ carregar()
 fotoInput.click()
 
 }
+
+
+async function apagar(id){
+
+let senha = prompt("Digite a senha para apagar:")
+
+if(senha !== senhaAdmin){
+
+alert("Senha incorreta")
+return
+
+}
+
+if(!confirm("Tem certeza que deseja apagar este registro?")) return
+
+await supabaseClient
+.from("manutencao-academia")
+.delete()
+.eq("id",id)
+
+alert("Registro apagado")
+
+carregar()
+
+}
+
 
 document.getElementById("filtro").addEventListener("input",render)
 
