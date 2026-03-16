@@ -27,19 +27,19 @@
       margin-top:6px;
     }
 
-    .foto-conserto{
-      width:100%;
-      max-width:260px;
-      border-radius:10px;
-      margin-top:10px;
-      border:1px solid #ddd;
-      display:block;
-    }
-
     .status-texto{
       display:inline-block;
       margin-top:8px;
       font-weight:bold;
+    }
+
+    .vazio{
+      background:#fff;
+      border-radius:10px;
+      padding:16px;
+      color:#666;
+      border:1px dashed #ccc;
+      margin-bottom:12px;
     }
   </style>
 </head>
@@ -72,16 +72,13 @@
 
 </div>
 
-<input type="file" id="fotoInput" accept="image/*" capture="environment" style="display:none">
-
 <script>
   const senhaAdmin = "7c9446a1";
+  const senhaResolver = "oud4123";
 
   const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
   const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-  const bucketFotos = "manutencao";
 
   const maquinas = {
     "1":"MESA FLEXORA",
@@ -190,7 +187,6 @@
   };
 
   let manutencoes = [];
-  let idResolucaoAtual = null;
 
   async function carregar(){
     const { data, error } = await supabaseClient
@@ -217,6 +213,7 @@
     listaResolvidos.innerHTML = "";
 
     let abertas = 0;
+    let resolvidas = 0;
 
     manutencoes.forEach(item => {
       const nome = maquinas[item.maquina_id] || "Máquina";
@@ -227,10 +224,6 @@
       const statusNormalizado = String(item.status || "").trim().toLowerCase();
       const estaResolvido = statusNormalizado === "resolvido";
       const estaAberto = !estaResolvido;
-
-      const fotoHtml = item.foto_conserto
-        ? `<div><img src="${item.foto_conserto}" alt="Foto do conserto" class="foto-conserto"></div>`
-        : "";
 
       const statusHtml = estaAberto
         ? `<span class="badge bg-danger">ABERTO</span>`
@@ -252,7 +245,6 @@
             <p class="mb-2">${item.descricao}</p>
             <small>${new Date(item.data).toLocaleString()}</small>
             <div class="status-texto">${statusHtml}</div>
-            ${fotoHtml}
             <div class="mt-2">
               ${botoesHtml}
             </div>
@@ -265,86 +257,56 @@
         abertas++;
       } else {
         listaResolvidos.innerHTML += card;
+        resolvidas++;
       }
     });
+
+    if(abertas === 0){
+      listaAbertos.innerHTML = `<div class="vazio">Nenhuma manutenção em aberto.</div>`;
+    }
+
+    if(resolvidas === 0){
+      listaResolvidos.innerHTML = `<div class="vazio">Nenhuma manutenção resolvida ainda.</div>`;
+    }
 
     document.getElementById("contador").innerText = abertas;
   }
 
   async function resolver(id){
-    idResolucaoAtual = id;
-    const fotoInput = document.getElementById("fotoInput");
-    fotoInput.value = "";
-    fotoInput.click();
-  }
+    const senha = prompt("Digite a senha para resolver:");
 
-  document.getElementById("fotoInput").addEventListener("change", async function(){
-    if(!idResolucaoAtual) return;
-
-    const file = this.files[0];
-    if(!file){
-      idResolucaoAtual = null;
+    if(senha !== senhaResolver){
+      alert("Senha incorreta");
       return;
     }
 
-    const extensaoOriginal = file.name && file.name.includes(".")
-      ? file.name.split(".").pop().toLowerCase()
-      : "";
+    const confirmar = confirm("Tem certeza que deseja marcar esta manutenção como resolvida?");
+    if(!confirmar) return;
 
-    const extensao = extensaoOriginal || "jpg";
-    const caminhoArquivo = `consertos/${idResolucaoAtual}_${Date.now()}.${extensao}`;
-
-    const { error: uploadError } = await supabaseClient.storage
-      .from(bucketFotos)
-      .upload(caminhoArquivo, file, { upsert: false });
-
-    if(uploadError){
-      alert("Erro ao enviar foto do conserto: " + uploadError.message);
-      console.log("Erro de upload:", uploadError);
-      idResolucaoAtual = null;
-      this.value = "";
-      return;
-    }
-
-    const { data: publicUrlData } = supabaseClient.storage
-      .from(bucketFotos)
-      .getPublicUrl(caminhoArquivo);
-
-    const urlFoto = publicUrlData.publicUrl;
-
-    const { data: dadosAtualizados, error: updateError } = await supabaseClient
+    const { data: dadosAtualizados, error } = await supabaseClient
       .from("manutencao_academia")
-      .update({
-        status: "resolvido",
-        foto_conserto: urlFoto
-      })
-      .eq("id", idResolucaoAtual)
+      .update({ status: "resolvido" })
+      .eq("id", id)
       .select();
 
-    if(updateError){
-      alert("Erro ao marcar manutenção como resolvida: " + updateError.message);
-      console.log("Erro ao atualizar registro:", updateError);
-      idResolucaoAtual = null;
-      this.value = "";
+    if(error){
+      alert("Erro ao resolver manutenção: " + error.message);
+      console.log(error);
       return;
     }
 
     console.log("Registro atualizado:", dadosAtualizados);
 
     manutencoes = manutencoes.map(item =>
-      item.id === idResolucaoAtual
-        ? { ...item, status: "resolvido", foto_conserto: urlFoto }
+      item.id === id
+        ? { ...item, status: "resolvido" }
         : item
     );
 
     render();
     alert("Manutenção resolvida com sucesso");
-
-    idResolucaoAtual = null;
-    this.value = "";
-
     carregar();
-  });
+  }
 
   async function apagar(id){
     const senha = prompt("Digite a senha para apagar:");
