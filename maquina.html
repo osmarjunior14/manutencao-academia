@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Registrar manutenção</title>
+</head>
+
+<body>
+
+<h2>Registrar manutenção</h2>
+
+<p id="maquina"></p>
+
+<textarea id="descricao" maxlength="200"
+placeholder="Descreva o problema"></textarea>
+
+<br><br>
+
+<button onclick="registrar()">Registrar</button>
+
+<script>
+
+const params = new URLSearchParams(window.location.search)
+const maquinaId = params.get("id")
+
+document.getElementById("maquina").innerText =
+"Máquina ID: " + maquinaId
+
+function registrar(){
+
+let descricao = document.getElementById("descricao").value
+
+alert("Registro enviado da máquina "+maquinaId)
+
+}
+
+</script>
+
+</body>
+</html>
