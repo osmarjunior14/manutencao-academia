@@ -2,7 +2,11 @@
 <html>
 
 <head>
+<meta charset="UTF-8">
 <title>Registrar manutenção</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -18,44 +22,52 @@ placeholder="Descreva o problema"></textarea>
 
 <button onclick="registrar()">Registrar</button>
 
-<!-- biblioteca do Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<!-- conexão com seu banco -->
-<script src="supabase.js"></script>
-
 <script>
 
+// CONEXÃO SUPABASE
+const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co"
+const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
+
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+// PEGAR ID DA MÁQUINA
 const params = new URLSearchParams(window.location.search)
 const maquinaId = params.get("id")
 
 document.getElementById("maquina").innerText =
 "Máquina ID: " + maquinaId
 
+// FUNÇÃO REGISTRAR
 async function registrar(){
 
 let descricao = document.getElementById("descricao").value
 
-if(descricao.trim() === ""){
-alert("Descreva o problema primeiro")
+if(!descricao){
+alert("Descreva o problema")
 return
 }
 
 const { error } = await supabase
 .from("manutencao-academia")
-.insert([{
+.insert([
+{
 maquina_id: maquinaId,
 descricao: descricao,
 data: new Date(),
 status: "aberto"
-}])
+}
+])
 
 if(error){
+
 alert("Erro ao registrar manutenção")
-console.log(error)
+
 }else{
-alert("Manutenção registrada com sucesso!")
+
+alert("Manutenção registrada com sucesso")
+
 document.getElementById("descricao").value=""
+
 }
 
 }
