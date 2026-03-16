@@ -33,6 +33,7 @@
       border-radius:10px;
       margin-top:10px;
       border:1px solid #ddd;
+      display:block;
     }
 
     .status-texto{
@@ -78,7 +79,6 @@
 
   const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
   const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
-
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
   const bucketFotos = "manutencao";
@@ -208,7 +208,7 @@
   }
 
   function render(){
-    const filtro = document.getElementById("filtro").value.toLowerCase();
+    const filtro = document.getElementById("filtro").value.toLowerCase().trim();
 
     const listaAbertos = document.getElementById("listaAbertos");
     const listaResolvidos = document.getElementById("listaResolvidos");
@@ -224,15 +224,19 @@
 
       if(!maquina.toLowerCase().includes(filtro)) return;
 
+      const statusNormalizado = String(item.status || "").toLowerCase().trim();
+      const estaAberto = statusNormalizado === "aberto";
+      const estaResolvido = statusNormalizado === "resolvido";
+
       const fotoHtml = item.foto_conserto
         ? `<div><img src="${item.foto_conserto}" alt="Foto do conserto" class="foto-conserto"></div>`
         : "";
 
-      const statusHtml = item.status === "aberto"
+      const statusHtml = estaAberto
         ? `<span class="badge bg-danger">ABERTO</span>`
         : `<span class="badge bg-success">RESOLVIDO</span>`;
 
-      const botoesHtml = item.status === "aberto"
+      const botoesHtml = estaAberto
         ? `
           <button class="btn btn-success botao" onclick="resolver('${item.id}')">Resolver</button>
           <button class="btn btn-danger botao" onclick="apagar('${item.id}')">Apagar</button>
@@ -242,7 +246,7 @@
         `;
 
       const card = `
-        <div class="card mb-3 shadow ${item.status === "aberto" ? "card-maquina" : "card-resolvido"}">
+        <div class="card mb-3 shadow ${estaAberto ? "card-maquina" : "card-resolvido"}">
           <div class="card-body">
             <h5>${maquina}</h5>
             <p class="mb-2">${item.descricao}</p>
@@ -256,10 +260,10 @@
         </div>
       `;
 
-      if(item.status === "aberto"){
+      if(estaAberto){
         listaAbertos.innerHTML += card;
         abertas++;
-      } else {
+      } else if(estaResolvido){
         listaResolvidos.innerHTML += card;
       }
     });
@@ -283,18 +287,23 @@
       return;
     }
 
-    const extensao = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
-    const caminhoArquivo = `consertos/${idResolucaoAtual}.${extensao}`;
+    const extensaoOriginal = file.name && file.name.includes(".")
+      ? file.name.split(".").pop().toLowerCase()
+      : "";
+
+    const extensao = extensaoOriginal || "jpg";
+    const caminhoArquivo = `consertos/${idResolucaoAtual}_${Date.now()}.${extensao}`;
 
     const { error: uploadError } = await supabaseClient.storage
       .from(bucketFotos)
-      .upload(caminhoArquivo, file, { upsert:true });
+      .upload(caminhoArquivo, file, { upsert: false });
 
     if(uploadError){
-    alert("Erro ao enviar foto: " + uploadError.message);
-    console.log(uploadError);
-    idResolucaoAtual = null;
-    return;
+      alert("Erro ao enviar foto do conserto: " + uploadError.message);
+      console.log("Erro de upload:", uploadError);
+      idResolucaoAtual = null;
+      this.value = "";
+      return;
     }
 
     const { data: publicUrlData } = supabaseClient.storage
@@ -312,14 +321,25 @@
       .eq("id", idResolucaoAtual);
 
     if(updateError){
-      alert("Erro ao marcar manutenção como resolvida");
-      console.log(updateError);
-    } else {
-      alert("Manutenção resolvida com sucesso");
-      carregar();
+      alert("Erro ao marcar manutenção como resolvida: " + updateError.message);
+      console.log("Erro ao atualizar registro:", updateError);
+      idResolucaoAtual = null;
+      this.value = "";
+      return;
     }
 
+    manutencoes = manutencoes.map(item =>
+      item.id === idResolucaoAtual
+        ? { ...item, status: "resolvido", foto_conserto: urlFoto }
+        : item
+    );
+
+    render();
+    alert("Manutenção resolvida com sucesso");
+    carregar();
+
     idResolucaoAtual = null;
+    this.value = "";
   });
 
   async function apagar(id){
@@ -339,7 +359,7 @@
       .eq("id", id);
 
     if(error){
-      alert("Erro ao apagar registro");
+      alert("Erro ao apagar registro: " + error.message);
       console.log(error);
     } else {
       alert("Registro apagado com sucesso");
