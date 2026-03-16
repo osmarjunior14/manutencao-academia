@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Registrar manutenção</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <meta charset="UTF-8">
+  <title>Registrar manutenção</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -23,55 +20,57 @@ placeholder="Descreva o problema"></textarea>
 <button onclick="registrar()">Registrar</button>
 
 <script>
+  // CONEXÃO SUPABASE
+  const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co"
+  const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
 
-// CONEXÃO SUPABASE
-const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co"
-const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
+  // PEGAR ID DA MÁQUINA DA URL
+  const params = new URLSearchParams(window.location.search)
+  const maquinaId = params.get("id")
 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+  const maquinaLabel = document.getElementById("maquina")
 
-// PEGAR ID DA MÁQUINA
-const params = new URLSearchParams(window.location.search)
-const maquinaId = params.get("id")
+  if (maquinaId) {
+    maquinaLabel.innerText = "Máquina ID: " + maquinaId
+  } else {
+    maquinaLabel.innerText = "⚠️ Nenhum ID de máquina foi informado na URL."
+  }
 
-document.getElementById("maquina").innerText =
-"Máquina ID: " + maquinaId
+  // FUNÇÃO REGISTRAR
+  async function registrar(){
 
-// FUNÇÃO REGISTRAR
-async function registrar(){
+    if(!maquinaId){
+      alert("Não é possível registrar sem ID da máquina.")
+      return
+    }
 
-let descricao = document.getElementById("descricao").value
+    let descricao = document.getElementById("descricao").value
 
-if(!descricao){
-alert("Descreva o problema")
-return
-}
+    if(!descricao){
+      alert("Descreva o problema")
+      return
+    }
 
-const { error } = await supabase
-.from("manutencao-academia")
-.insert([
-{
-maquina_id: maquinaId,
-descricao: descricao,
-data: new Date(),
-status: "aberto"
-}
-])
+    const { error } = await supabase
+      .from("manutencao-academia")
+      .insert([
+        {
+          maquina_id: maquinaId,
+          descricao: descricao,
+          data: new Date(),
+          status: "aberto"
+        }
+      ])
 
-if(error){
-
-alert("Erro ao registrar manutenção")
-
-}else{
-
-alert("Manutenção registrada com sucesso")
-
-document.getElementById("descricao").value=""
-
-}
-
-}
-
+    if(error){
+      alert("Erro ao registrar manutenção")
+      console.log(error)
+    } else {
+      alert("Manutenção registrada com sucesso")
+      document.getElementById("descricao").value=""
+    }
+  }
 </script>
 
 </body>
