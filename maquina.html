@@ -2,25 +2,131 @@
 <html lang="pt-BR">
 
 <head>
+
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>Registrar manutenção</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+font-family:system-ui,-apple-system,Arial;
+}
+
+body{
+background:#0f172a;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:20px;
+}
+
+.card{
+
+background:#1e293b;
+width:100%;
+max-width:500px;
+border-radius:16px;
+padding:30px;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+
+}
+
+h1{
+
+font-size:28px;
+margin-bottom:25px;
+text-align:center;
+
+}
+
+.maquina{
+
+background:#0ea5e9;
+padding:18px;
+border-radius:10px;
+font-size:22px;
+font-weight:bold;
+text-align:center;
+margin-bottom:25px;
+
+}
+
+textarea{
+
+width:100%;
+height:120px;
+border:none;
+border-radius:10px;
+padding:15px;
+font-size:18px;
+margin-bottom:20px;
+
+}
+
+textarea:focus{
+
+outline:3px solid #0ea5e9;
+
+}
+
+button{
+
+width:100%;
+padding:18px;
+font-size:20px;
+font-weight:bold;
+border:none;
+border-radius:10px;
+background:#22c55e;
+color:white;
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#16a34a;
+
+}
+
+.sucesso{
+
+margin-top:15px;
+text-align:center;
+font-weight:bold;
+color:#22c55e;
+
+}
+
+</style>
 
 </head>
 
 <body>
 
-<h2>Registrar manutenção</h2>
+<div class="card">
 
-<p id="maquina"></p>
+<h1>Registrar manutenção</h1>
+
+<div class="maquina" id="maquina"></div>
 
 <textarea id="descricao" maxlength="200"
-placeholder="Descreva o problema"></textarea>
+placeholder="Descreva o problema da máquina"></textarea>
 
-<br><br>
+<button onclick="registrar()">Registrar problema</button>
 
-<button onclick="registrar()">Registrar</button>
+<div id="msg" class="sucesso"></div>
+
+</div>
 
 <script>
 
@@ -45,13 +151,6 @@ const maquinas = {
 "9":"AGACHAMENTO LIVRE",
 "10":"CADEIRA FLEXORA",
 "11":"LEG PRESS 45º",
-
-"12.A":"CROSS OVER HORIZONTAL (POLIA A)",
-"12.B":"CROSS OVER HORIZONTAL (POLIA B)",
-
-"13.A":"CROSS OVER ANGULAR (POLIA A)",
-"13.B":"CROSS OVER ANGULAR (POLIA B)",
-
 "14":"LEG PRESS 45º",
 "15":"CADEIRA EXTENSORA",
 "16":"CADEIRA EXTENSORA",
@@ -60,10 +159,6 @@ const maquinas = {
 "19":"CADEIRA EXTENSORA",
 "20":"CADEIRA EXTENSORA",
 "21":"LEG PRESS 45º",
-
-"22.A":"CROSS OVER HORIZONTAL (POLIA A)",
-"22.B":"CROSS OVER HORIZONTAL (POLIA B)",
-
 "23":"LEG PRESS 180º",
 "24":"PUXADA ALTA CROSS MULTI ESTAÇÃO",
 "25":"POLIA EXTERNA CROSS MULTI ESTAÇÃO",
@@ -73,10 +168,6 @@ const maquinas = {
 "29":"REMADA BAIXA CROSS MULTI ESTAÇÃO",
 "30":"AGACHAMENTO HACK",
 "31":"SMITH MACHINE",
-
-"32.A":"CROSS OVER MULTI ESTAÇÃO (POLIA A)",
-"32.B":"CROSS OVER MULTI ESTAÇÃO (POLIA B)",
-
 "34":"LEG PRESS 180º",
 "35":"CALF MACHINE",
 "36":"SENTADILHA",
@@ -143,6 +234,16 @@ const maquinas = {
 "97":"BICICLETA HORIZONTAL",
 "98":"BICICLETA VERTICAL",
 "99":"ESTEIRA CURVA",
+
+"12.A":"CROSS OVER HORIZONTAL (POLIA A)",
+"12.B":"CROSS OVER HORIZONTAL (POLIA B)",
+"13.A":"CROSS OVER ANGULAR (POLIA A)",
+"13.B":"CROSS OVER ANGULAR (POLIA B)",
+"22.A":"CROSS OVER HORIZONTAL (POLIA A)",
+"22.B":"CROSS OVER HORIZONTAL (POLIA B)",
+"32.A":"CROSS OVER MULTI ESTAÇÃO (POLIA A)",
+"32.B":"CROSS OVER MULTI ESTAÇÃO (POLIA B)",
+
 "100":"SUPORTE PARA ELEVAÇÃO PÉLVICA"
 
 }
@@ -160,6 +261,7 @@ let descricao = document.getElementById("descricao").value
 if(!descricao){
 
 alert("Descreva o problema")
+
 return
 
 }
@@ -182,7 +284,9 @@ console.log(error)
 
 }else{
 
-alert("Manutenção registrada com sucesso")
+document.getElementById("msg").innerText =
+"✅ Problema registrado com sucesso"
+
 document.getElementById("descricao").value=""
 
 }
