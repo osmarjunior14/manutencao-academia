@@ -224,9 +224,9 @@
 
       if(!maquina.toLowerCase().includes(filtro)) return;
 
-      const statusNormalizado = String(item.status || "").toLowerCase().trim();
-      const estaAberto = statusNormalizado === "aberto";
+      const statusNormalizado = String(item.status || "").trim().toLowerCase();
       const estaResolvido = statusNormalizado === "resolvido";
+      const estaAberto = !estaResolvido;
 
       const fotoHtml = item.foto_conserto
         ? `<div><img src="${item.foto_conserto}" alt="Foto do conserto" class="foto-conserto"></div>`
@@ -263,7 +263,7 @@
       if(estaAberto){
         listaAbertos.innerHTML += card;
         abertas++;
-      } else if(estaResolvido){
+      } else {
         listaResolvidos.innerHTML += card;
       }
     });
@@ -312,13 +312,14 @@
 
     const urlFoto = publicUrlData.publicUrl;
 
-    const { error: updateError } = await supabaseClient
+    const { data: dadosAtualizados, error: updateError } = await supabaseClient
       .from("manutencao_academia")
       .update({
         status: "resolvido",
         foto_conserto: urlFoto
       })
-      .eq("id", idResolucaoAtual);
+      .eq("id", idResolucaoAtual)
+      .select();
 
     if(updateError){
       alert("Erro ao marcar manutenção como resolvida: " + updateError.message);
@@ -328,6 +329,8 @@
       return;
     }
 
+    console.log("Registro atualizado:", dadosAtualizados);
+
     manutencoes = manutencoes.map(item =>
       item.id === idResolucaoAtual
         ? { ...item, status: "resolvido", foto_conserto: urlFoto }
@@ -336,10 +339,11 @@
 
     render();
     alert("Manutenção resolvida com sucesso");
-    carregar();
 
     idResolucaoAtual = null;
     this.value = "";
+
+    carregar();
   });
 
   async function apagar(id){
