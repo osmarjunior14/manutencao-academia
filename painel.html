@@ -4,6 +4,8 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>Painel de Manutenções</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,6 +20,23 @@
 
 <h2 class="mb-4">Painel de Manutenções</h2>
 
+<div class="row mb-3">
+
+<div class="col-md-3">
+<div class="card text-center shadow">
+<div class="card-body">
+<h5>Problemas Abertos</h5>
+<h3 id="contador">0</h3>
+</div>
+</div>
+</div>
+
+<div class="col-md-4">
+<input class="form-control" id="filtro" placeholder="Filtrar máquina...">
+</div>
+
+</div>
+
 <div class="card shadow">
 
 <div class="card-body">
@@ -31,6 +50,7 @@
 <th>Problema</th>
 <th>Data</th>
 <th>Status</th>
+<th>Ação</th>
 </tr>
 
 </thead>
@@ -45,6 +65,8 @@
 
 </div>
 
+<input type="file" id="fotoInput" style="display:none">
+
 <script>
 
 const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co"
@@ -52,35 +74,206 @@ const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
 
+const maquinas = {
+
+"1":"MESA FLEXORA",
+"2":"MESA FLEXORA",
+"3":"APOLETE",
+"4":"FLEXORA VERTICAL ARTICULADA",
+"5":"ELEVAÇÃO PÉLVICA ARTICULADA",
+"6":"CADEIRA FLEXORA",
+"7":"BANCO HORIZONTAL",
+"8":"CAVALINHO LIVRE",
+"9":"AGACHAMENTO LIVRE",
+"10":"CADEIRA FLEXORA",
+"11":"LEG PRESS 45º",
+"14":"LEG PRESS 45º",
+"15":"CADEIRA EXTENSORA",
+"16":"CADEIRA EXTENSORA",
+"17":"SMITH MACHINE",
+"18":"SMITH MACHINE",
+"19":"CADEIRA EXTENSORA",
+"20":"CADEIRA EXTENSORA",
+"21":"LEG PRESS 45º",
+"23":"LEG PRESS 180º",
+"24":"PUXADA ALTA CROSS MULTI ESTAÇÃO",
+"25":"POLIA EXTERNA CROSS MULTI ESTAÇÃO",
+"26":"REMADA BAIXA CROSS MULTI ESTAÇÃO",
+"27":"PUXADA ALTA CROSS MULTI ESTAÇÃO",
+"28":"POLIA EXTERNA CROSS MULTI ESTAÇÃO",
+"29":"REMADA BAIXA CROSS MULTI ESTAÇÃO",
+"30":"AGACHAMENTO HACK",
+"31":"SMITH MACHINE",
+"34":"LEG PRESS 180º",
+"35":"CALF MACHINE",
+"36":"SENTADILHA",
+"37":"REMADA MÁQUINA",
+"38":"CAVALINHO ARTICULADO",
+"39":"HACK INVERTIDO",
+"40":"BELT SQUAT",
+"41":"DESENVOLVIMENTO ARTICULADO",
+"42":"DESENVOLVIMENTO ARTICULADO",
+"43":"SCOTT ARTICULADO",
+"44":"ROSCA DIRETA MÁQUINA",
+"45":"SUPINO HORIZONTAL ARTICULADO",
+"46":"PUXADOR REMADOR",
+"47":"PUXADOR/REMADOR",
+"48":"PUXADA ALTA ARTICULADA",
+"49":"PUXADA ALTA ARTICULADA",
+"50":"REMADA ARTICULADA",
+"51":"BANCO SCOTT",
+"52":"REMADA BAIXA ARTICULADA",
+"53":"AFUNDO ARTICULADO",
+"54":"SUPINO INCLINADO ARTICULADO",
+"55":"SUPINO VERTICAL ARTICULADO",
+"56":"PARALELA ARTICULADA",
+"57":"GRAVITON",
+"58":"VOADOR",
+"59":"SUPINO DECLINADO",
+"60":"VOADOR",
+"61":"ELÍPTICO",
+"62":"ELÍPTICO",
+"63":"CADEIRA ABDUTORA",
+"64":"CADEIRA ADUTORA",
+"65":"SUPINO INCLINADO",
+"66":"BICICLETA SPINNING",
+"67":"BICICLETA SPINNING",
+"68":"BICICLETA VERTICAL",
+"69":"SIMULADOR DE ESCADA",
+"70":"SIMULADOR DE ESCADA",
+"71":"BICICLETA VERTICAL",
+"72":"BICICLETA HORIZONTAL",
+"73":"SUPINO HORIZONTAL",
+"74":"SUPINO HORIZONTAL",
+"75":"ESTEIRA",
+"76":"ESTEIRA",
+"77":"ESTEIRA",
+"78":"ESTEIRA",
+"79":"ESTEIRA",
+"80":"ESTEIRA",
+"81":"ESTEIRA",
+"82":"ESTEIRA",
+"83":"ESTEIRA",
+"84":"ESTEIRA",
+"85":"ESTEIRA",
+"86":"ESTEIRA",
+"87":"ESTEIRA",
+"88":"ESTEIRA",
+"89":"ESTEIRA",
+"90":"ESTEIRA",
+"91":"BANCO HORIZONTAL",
+"92":"SIMULADOR DE REMO",
+"93":"AIR BIKE",
+"94":"BANCO ROMANO",
+"95":"CADEIRA ADUTORA",
+"96":"CADEIRA ABDUTORA",
+"97":"BICICLETA HORIZONTAL",
+"98":"BICICLETA VERTICAL",
+"99":"ESTEIRA CURVA",
+
+"12.A":"CROSS OVER HORIZONTAL (POLIA A)",
+"12.B":"CROSS OVER HORIZONTAL (POLIA B)",
+"13.A":"CROSS OVER ANGULAR (POLIA A)",
+"13.B":"CROSS OVER ANGULAR (POLIA B)",
+"22.A":"CROSS OVER HORIZONTAL (POLIA A)",
+"22.B":"CROSS OVER HORIZONTAL (POLIA B)",
+"32.A":"CROSS OVER MULTI ESTAÇÃO (POLIA A)",
+"32.B":"CROSS OVER MULTI ESTAÇÃO (POLIA B)",
+
+"100":"SUPORTE PARA ELEVAÇÃO PÉLVICA"
+
+}
+
+let manutencoes = []
+
 async function carregar(){
 
-const { data, error } = await supabaseClient
+const { data } = await supabaseClient
 .from("manutencao-academia")
 .select("*")
 .order("data",{ascending:false})
 
+manutencoes = data
+
+render()
+
+}
+
+function render(){
+
+let filtro = document.getElementById("filtro").value.toLowerCase()
+
 let tabela = document.getElementById("tabela")
 
-data.forEach(item=>{
+tabela.innerHTML=""
 
-let statusCor = item.status === "aberto"
+let abertas = 0
+
+manutencoes.forEach(item=>{
+
+const nome = maquinas[item.maquina_id] || "Máquina"
+const maquina = nome + " - " + item.maquina_id
+
+if(!maquina.toLowerCase().includes(filtro)) return
+
+if(item.status==="aberto") abertas++
+
+let statusCor = item.status==="aberto"
 ? `<span class="badge bg-danger">ABERTO</span>`
 : `<span class="badge bg-success">RESOLVIDO</span>`
 
+let botao = item.status==="aberto"
+? `<button class="btn btn-sm btn-success" onclick="resolver('${item.id}')">Resolver</button>`
+: ""
+
 let linha = `
 <tr>
-<td>${item.maquina_id}</td>
+<td>${maquina}</td>
 <td>${item.descricao}</td>
 <td>${new Date(item.data).toLocaleString()}</td>
 <td>${statusCor}</td>
+<td>${botao}</td>
 </tr>
 `
 
-tabela.innerHTML += linha
+tabela.innerHTML+=linha
 
 })
 
+document.getElementById("contador").innerText = abertas
+
 }
+
+async function resolver(id){
+
+const fotoInput = document.getElementById("fotoInput")
+
+fotoInput.onchange = async function(){
+
+let file = fotoInput.files[0]
+
+let nomeArquivo = id + ".jpg"
+
+await supabaseClient.storage
+.from("manutencao")
+.upload(nomeArquivo,file,{upsert:true})
+
+await supabaseClient
+.from("manutencao-academia")
+.update({status:"resolvido"})
+.eq("id",id)
+
+alert("Manutenção resolvida!")
+
+carregar()
+
+}
+
+fotoInput.click()
+
+}
+
+document.getElementById("filtro").addEventListener("input",render)
 
 carregar()
 
