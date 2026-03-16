@@ -291,10 +291,10 @@
       .upload(caminhoArquivo, file, { upsert:true });
 
     if(uploadError){
-      alert("Erro ao enviar foto do conserto");
-      console.log(uploadError);
-      idResolucaoAtual = null;
-      return;
+    alert("Erro ao enviar foto: " + uploadError.message);
+    console.log(uploadError);
+    idResolucaoAtual = null;
+    return;
     }
 
     const { data: publicUrlData } = supabaseClient.storage
