@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<title>Painel de Manutenções</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+<h2>Painel de Manutenções</h2>
+
+<table border="1" cellpadding="10">
+
+<thead>
+<tr>
+<th>Máquina</th>
+<th>Problema</th>
+<th>Data</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="tabela">
+
+</tbody>
+
+</table>
+
+<script>
+
+const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co"
+const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
+
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+async function carregar(){
+
+const { data, error } = await supabaseClient
+.from("manutencao-academia")
+.select("*")
+.order("data",{ascending:false})
+
+let tabela = document.getElementById("tabela")
+
+data.forEach(item=>{
+
+let linha = `
+<tr>
+<td>${item.maquina_id}</td>
+<td>${item.descricao}</td>
+<td>${item.data}</td>
+<td>${item.status}</td>
+</tr>
+`
+
+tabela.innerHTML += linha
+
+})
+
+}
+
+carregar()
+
+</script>
+
+</body>
+</html>
