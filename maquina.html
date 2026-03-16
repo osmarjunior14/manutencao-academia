@@ -1,298 +1,433 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registrar manutenção</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<title>Registrar manutenção</title>
+  <style>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    body{
+      min-height:100vh;
+      font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #163a74 0%, #0b1838 45%, #071126 100%);
+      color:#ffffff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px 16px;
+    }
 
-<style>
+    .wrapper{
+      width:100%;
+      max-width:460px;
+    }
 
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-font-family:system-ui,-apple-system,Arial;
-}
+    .card{
+      background:rgba(17, 28, 53, 0.92);
+      border:1px solid rgba(255,255,255,0.08);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      border-radius:28px;
+      padding:28px 20px 22px;
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    }
 
-body{
-background:#0f172a;
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:100vh;
-padding:20px;
-}
+    .header{
+      text-align:center;
+      margin-bottom:22px;
+    }
 
-.card{
+    .header .badge-top{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(34,197,94,0.14);
+      color:#86efac;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:14px;
+      letter-spacing:0.2px;
+    }
 
-background:#1e293b;
-width:100%;
-max-width:500px;
-border-radius:16px;
-padding:30px;
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    .header h1{
+      font-size:34px;
+      line-height:1.05;
+      font-weight:800;
+      letter-spacing:-0.8px;
+      margin-bottom:8px;
+    }
 
-}
+    .header p{
+      color:rgba(255,255,255,0.72);
+      font-size:15px;
+      line-height:1.45;
+    }
 
-h1{
+    .machine-box{
+      margin-top:6px;
+      margin-bottom:18px;
+      padding:16px 16px;
+      border-radius:20px;
+      background:linear-gradient(135deg, #27b8f5 0%, #1490e6 100%);
+      box-shadow:0 14px 30px rgba(20,144,230,0.28);
+    }
 
-font-size:28px;
-margin-bottom:25px;
-text-align:center;
+    .machine-label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      font-weight:700;
+      opacity:0.85;
+      margin-bottom:6px;
+    }
 
-}
+    .machine-name{
+      font-size:27px;
+      font-weight:800;
+      line-height:1.1;
+      letter-spacing:-0.5px;
+      word-break:break-word;
+    }
 
-.maquina{
+    .form-group{
+      margin-top:14px;
+    }
 
-background:#0ea5e9;
-padding:18px;
-border-radius:10px;
-font-size:22px;
-font-weight:bold;
-text-align:center;
-margin-bottom:25px;
+    .field-label{
+      display:block;
+      font-size:14px;
+      font-weight:700;
+      color:rgba(255,255,255,0.86);
+      margin-bottom:10px;
+    }
 
-}
+    textarea{
+      width:100%;
+      min-height:150px;
+      resize:none;
+      border:none;
+      outline:none;
+      border-radius:20px;
+      padding:18px 16px;
+      background:#f7f8fb;
+      color:#0f172a;
+      font-size:17px;
+      line-height:1.45;
+      box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);
+    }
 
-textarea{
+    textarea::placeholder{
+      color:#94a3b8;
+    }
 
-width:100%;
-height:120px;
-border:none;
-border-radius:10px;
-padding:15px;
-font-size:18px;
-margin-bottom:20px;
+    .helper{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:8px;
+      font-size:13px;
+      color:rgba(255,255,255,0.62);
+    }
 
-}
+    .button{
+      width:100%;
+      margin-top:18px;
+      border:none;
+      border-radius:20px;
+      padding:18px 20px;
+      background:linear-gradient(135deg, #31d66b 0%, #22c55e 100%);
+      color:white;
+      font-size:22px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 14px 30px rgba(34,197,94,0.28);
+      transition:transform .12s ease, filter .12s ease;
+    }
 
-textarea:focus{
+    .button:active{
+      transform:scale(0.985);
+      filter:brightness(0.98);
+    }
 
-outline:3px solid #0ea5e9;
+    .button:disabled{
+      opacity:0.7;
+      cursor:not-allowed;
+    }
 
-}
+    .message{
+      display:none;
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:16px;
+      font-size:15px;
+      font-weight:700;
+      line-height:1.4;
+    }
 
-button{
+    .message.success{
+      display:block;
+      background:rgba(34,197,94,0.14);
+      color:#86efac;
+      border:1px solid rgba(34,197,94,0.25);
+    }
 
-width:100%;
-padding:18px;
-font-size:20px;
-font-weight:bold;
-border:none;
-border-radius:10px;
-background:#22c55e;
-color:white;
-cursor:pointer;
+    .message.error{
+      display:block;
+      background:rgba(239,68,68,0.14);
+      color:#fca5a5;
+      border:1px solid rgba(239,68,68,0.24);
+    }
 
-}
+    .footer-note{
+      text-align:center;
+      margin-top:18px;
+      color:rgba(255,255,255,0.45);
+      font-size:12px;
+      line-height:1.4;
+    }
 
-button:hover{
+    @media (max-width: 430px){
+      .card{
+        border-radius:24px;
+        padding:24px 16px 20px;
+      }
 
-background:#16a34a;
+      .header h1{
+        font-size:29px;
+      }
 
-}
+      .machine-name{
+        font-size:23px;
+      }
 
-.sucesso{
-
-margin-top:15px;
-text-align:center;
-font-weight:bold;
-color:#22c55e;
-
-}
-
-</style>
-
+      .button{
+        font-size:20px;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="card">
+<div class="wrapper">
+  <div class="card">
 
-<h1>Registrar manutenção</h1>
+    <div class="header">
+      <div class="badge-top">● Sistema de manutenção</div>
+      <h1>Registrar manutenção</h1>
+      <p>Informe o problema encontrado neste equipamento.</p>
+    </div>
 
-<div class="maquina" id="maquina"></div>
+    <div class="machine-box">
+      <div class="machine-label">Equipamento</div>
+      <div class="machine-name" id="maquina"></div>
+    </div>
 
-<textarea id="descricao" maxlength="200"
-placeholder="Descreva o problema da máquina"></textarea>
+    <div class="form-group">
+      <label class="field-label" for="descricao">Descrição do problema</label>
+      <textarea
+        id="descricao"
+        maxlength="200"
+        placeholder="Ex.: cabo rompido, banco solto, barulho anormal, travamento..."
+      ></textarea>
 
-<button onclick="registrar()">Registrar problema</button>
+      <div class="helper">
+        <span>Máximo de 200 caracteres</span>
+        <span id="contadorCaracteres">0/200</span>
+      </div>
+    </div>
 
-<div id="msg" class="sucesso"></div>
+    <button class="button" id="botaoRegistrar" onclick="registrar()">
+      Registrar problema
+    </button>
 
+    <div id="msg" class="message"></div>
+
+    <div class="footer-note">
+      Seu registro será enviado para a equipe de manutenção.
+    </div>
+
+  </div>
 </div>
 
 <script>
+  const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
+  const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
+  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co"
-const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
+  const params = new URLSearchParams(window.location.search);
+  const maquinaId = params.get("id");
 
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
+  const maquinas = {
+    "1":"MESA FLEXORA",
+    "2":"MESA FLEXORA",
+    "3":"APOLETE",
+    "4":"FLEXORA VERTICAL ARTICULADA",
+    "5":"ELEVAÇÃO PÉLVICA ARTICULADA",
+    "6":"CADEIRA FLEXORA",
+    "7":"BANCO HORIZONTAL",
+    "8":"CAVALINHO LIVRE",
+    "9":"AGACHAMENTO LIVRE",
+    "10":"CADEIRA FLEXORA",
+    "11":"LEG PRESS 45º",
+    "12.A":"CROSS OVER HORIZONTAL (POLIA A)",
+    "12.B":"CROSS OVER HORIZONTAL (POLIA B)",
+    "13.A":"CROSS OVER ANGULAR (POLIA A)",
+    "13.B":"CROSS OVER ANGULAR (POLIA B)",
+    "14":"LEG PRESS 45º",
+    "15":"CADEIRA EXTENSORA",
+    "16":"CADEIRA EXTENSORA",
+    "17":"SMITH MACHINE",
+    "18":"SMITH MACHINE",
+    "19":"CADEIRA EXTENSORA",
+    "20":"CADEIRA EXTENSORA",
+    "21":"LEG PRESS 45º",
+    "22.A":"CROSS OVER HORIZONTAL (POLIA A)",
+    "22.B":"CROSS OVER HORIZONTAL (POLIA B)",
+    "23":"LEG PRESS 180º",
+    "24":"PUXADA ALTA CROSS MULTI ESTAÇÃO",
+    "25":"POLIA EXTERNA CROSS MULTI ESTAÇÃO",
+    "26":"REMADA BAIXA CROSS MULTI ESTAÇÃO",
+    "27":"PUXADA ALTA CROSS MULTI ESTAÇÃO",
+    "28":"POLIA EXTERNA CROSS MULTI ESTAÇÃO",
+    "29":"REMADA BAIXA CROSS MULTI ESTAÇÃO",
+    "30":"AGACHAMENTO HACK",
+    "31":"SMITH MACHINE",
+    "32.A":"CROSS OVER MULTI ESTAÇÃO (POLIA A)",
+    "32.B":"CROSS OVER MULTI ESTAÇÃO (POLIA B)",
+    "34":"LEG PRESS 180º",
+    "35":"CALF MACHINE",
+    "36":"SENTADILHA",
+    "37":"REMADA MÁQUINA",
+    "38":"CAVALINHO ARTICULADO",
+    "39":"HACK INVERTIDO",
+    "40":"BELT SQUAT",
+    "41":"DESENVOLVIMENTO ARTICULADO",
+    "42":"DESENVOLVIMENTO ARTICULADO",
+    "43":"SCOTT ARTICULADO",
+    "44":"ROSCA DIRETA MÁQUINA",
+    "45":"SUPINO HORIZONTAL ARTICULADO",
+    "46":"PUXADOR REMADOR",
+    "47":"PUXADOR/REMADOR",
+    "48":"PUXADA ALTA ARTICULADA",
+    "49":"PUXADA ALTA ARTICULADA",
+    "50":"REMADA ARTICULADA",
+    "51":"BANCO SCOTT",
+    "52":"REMADA BAIXA ARTICULADA",
+    "53":"AFUNDO ARTICULADO",
+    "54":"SUPINO INCLINADO ARTICULADO",
+    "55":"SUPINO VERTICAL ARTICULADO",
+    "56":"PARALELA ARTICULADA",
+    "57":"GRAVITON",
+    "58":"VOADOR",
+    "59":"SUPINO DECLINADO",
+    "60":"VOADOR",
+    "61":"ELÍPTICO",
+    "62":"ELÍPTICO",
+    "63":"CADEIRA ABDUTORA",
+    "64":"CADEIRA ADUTORA",
+    "65":"SUPINO INCLINADO",
+    "66":"BICICLETA SPINNING",
+    "67":"BICICLETA SPINNING",
+    "68":"BICICLETA VERTICAL",
+    "69":"SIMULADOR DE ESCADA",
+    "70":"SIMULADOR DE ESCADA",
+    "71":"BICICLETA VERTICAL",
+    "72":"BICICLETA HORIZONTAL",
+    "73":"SUPINO HORIZONTAL",
+    "74":"SUPINO HORIZONTAL",
+    "75":"ESTEIRA",
+    "76":"ESTEIRA",
+    "77":"ESTEIRA",
+    "78":"ESTEIRA",
+    "79":"ESTEIRA",
+    "80":"ESTEIRA",
+    "81":"ESTEIRA",
+    "82":"ESTEIRA",
+    "83":"ESTEIRA",
+    "84":"ESTEIRA",
+    "85":"ESTEIRA",
+    "86":"ESTEIRA",
+    "87":"ESTEIRA",
+    "88":"ESTEIRA",
+    "89":"ESTEIRA",
+    "90":"ESTEIRA",
+    "91":"BANCO HORIZONTAL",
+    "92":"SIMULADOR DE REMO",
+    "93":"AIR BIKE",
+    "94":"BANCO ROMANO",
+    "95":"CADEIRA ADUTORA",
+    "96":"CADEIRA ABDUTORA",
+    "97":"BICICLETA HORIZONTAL",
+    "98":"BICICLETA VERTICAL",
+    "99":"ESTEIRA CURVA",
+    "100":"SUPORTE PARA ELEVAÇÃO PÉLVICA"
+  };
 
-const params = new URLSearchParams(window.location.search)
-const maquinaId = params.get("id")
+  const nomeMaquina = maquinas[maquinaId] || "Máquina";
+  document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
 
-const maquinas = {
+  const descricaoEl = document.getElementById("descricao");
+  const contadorEl = document.getElementById("contadorCaracteres");
+  const msgEl = document.getElementById("msg");
+  const botaoEl = document.getElementById("botaoRegistrar");
 
-"1":"MESA FLEXORA",
-"2":"MESA FLEXORA",
-"3":"APOLETE",
-"4":"FLEXORA VERTICAL ARTICULADA",
-"5":"ELEVAÇÃO PÉLVICA ARTICULADA",
-"6":"CADEIRA FLEXORA",
-"7":"BANCO HORIZONTAL",
-"8":"CAVALINHO LIVRE",
-"9":"AGACHAMENTO LIVRE",
-"10":"CADEIRA FLEXORA",
-"11":"LEG PRESS 45º",
-"14":"LEG PRESS 45º",
-"15":"CADEIRA EXTENSORA",
-"16":"CADEIRA EXTENSORA",
-"17":"SMITH MACHINE",
-"18":"SMITH MACHINE",
-"19":"CADEIRA EXTENSORA",
-"20":"CADEIRA EXTENSORA",
-"21":"LEG PRESS 45º",
-"23":"LEG PRESS 180º",
-"24":"PUXADA ALTA CROSS MULTI ESTAÇÃO",
-"25":"POLIA EXTERNA CROSS MULTI ESTAÇÃO",
-"26":"REMADA BAIXA CROSS MULTI ESTAÇÃO",
-"27":"PUXADA ALTA CROSS MULTI ESTAÇÃO",
-"28":"POLIA EXTERNA CROSS MULTI ESTAÇÃO",
-"29":"REMADA BAIXA CROSS MULTI ESTAÇÃO",
-"30":"AGACHAMENTO HACK",
-"31":"SMITH MACHINE",
-"34":"LEG PRESS 180º",
-"35":"CALF MACHINE",
-"36":"SENTADILHA",
-"37":"REMADA MÁQUINA",
-"38":"CAVALINHO ARTICULADO",
-"39":"HACK INVERTIDO",
-"40":"BELT SQUAT",
-"41":"DESENVOLVIMENTO ARTICULADO",
-"42":"DESENVOLVIMENTO ARTICULADO",
-"43":"SCOTT ARTICULADO",
-"44":"ROSCA DIRETA MÁQUINA",
-"45":"SUPINO HORIZONTAL ARTICULADO",
-"46":"PUXADOR REMADOR",
-"47":"PUXADOR/REMADOR",
-"48":"PUXADA ALTA ARTICULADA",
-"49":"PUXADA ALTA ARTICULADA",
-"50":"REMADA ARTICULADA",
-"51":"BANCO SCOTT",
-"52":"REMADA BAIXA ARTICULADA",
-"53":"AFUNDO ARTICULADO",
-"54":"SUPINO INCLINADO ARTICULADO",
-"55":"SUPINO VERTICAL ARTICULADO",
-"56":"PARALELA ARTICULADA",
-"57":"GRAVITON",
-"58":"VOADOR",
-"59":"SUPINO DECLINADO",
-"60":"VOADOR",
-"61":"ELÍPTICO",
-"62":"ELÍPTICO",
-"63":"CADEIRA ABDUTORA",
-"64":"CADEIRA ADUTORA",
-"65":"SUPINO INCLINADO",
-"66":"BICICLETA SPINNING",
-"67":"BICICLETA SPINNING",
-"68":"BICICLETA VERTICAL",
-"69":"SIMULADOR DE ESCADA",
-"70":"SIMULADOR DE ESCADA",
-"71":"BICICLETA VERTICAL",
-"72":"BICICLETA HORIZONTAL",
-"73":"SUPINO HORIZONTAL",
-"74":"SUPINO HORIZONTAL",
-"75":"ESTEIRA",
-"76":"ESTEIRA",
-"77":"ESTEIRA",
-"78":"ESTEIRA",
-"79":"ESTEIRA",
-"80":"ESTEIRA",
-"81":"ESTEIRA",
-"82":"ESTEIRA",
-"83":"ESTEIRA",
-"84":"ESTEIRA",
-"85":"ESTEIRA",
-"86":"ESTEIRA",
-"87":"ESTEIRA",
-"88":"ESTEIRA",
-"89":"ESTEIRA",
-"90":"ESTEIRA",
-"91":"BANCO HORIZONTAL",
-"92":"SIMULADOR DE REMO",
-"93":"AIR BIKE",
-"94":"BANCO ROMANO",
-"95":"CADEIRA ADUTORA",
-"96":"CADEIRA ABDUTORA",
-"97":"BICICLETA HORIZONTAL",
-"98":"BICICLETA VERTICAL",
-"99":"ESTEIRA CURVA",
+  descricaoEl.addEventListener("input", () => {
+    contadorEl.textContent = `${descricaoEl.value.length}/200`;
+  });
 
-"12.A":"CROSS OVER HORIZONTAL (POLIA A)",
-"12.B":"CROSS OVER HORIZONTAL (POLIA B)",
-"13.A":"CROSS OVER ANGULAR (POLIA A)",
-"13.B":"CROSS OVER ANGULAR (POLIA B)",
-"22.A":"CROSS OVER HORIZONTAL (POLIA A)",
-"22.B":"CROSS OVER HORIZONTAL (POLIA B)",
-"32.A":"CROSS OVER MULTI ESTAÇÃO (POLIA A)",
-"32.B":"CROSS OVER MULTI ESTAÇÃO (POLIA B)",
+  function mostrarMensagem(tipo, texto){
+    msgEl.className = `message ${tipo}`;
+    msgEl.textContent = texto;
+  }
 
-"100":"SUPORTE PARA ELEVAÇÃO PÉLVICA"
+  async function registrar(){
+    const descricao = descricaoEl.value.trim();
 
-}
+    if(!descricao){
+      mostrarMensagem("error", "Descreva o problema antes de registrar.");
+      return;
+    }
 
-const nomeMaquina = maquinas[maquinaId] || "Máquina"
+    botaoEl.disabled = true;
+    botaoEl.textContent = "Enviando...";
 
-document.getElementById("maquina").innerText =
-nomeMaquina + " - " + maquinaId
+    const { error } = await supabaseClient
+      .from("manutencao_academia")
+      .insert([
+        {
+          maquina_id: maquinaId,
+          descricao: descricao,
+          data: new Date().toISOString(),
+          status: "aberto"
+        }
+      ]);
 
+    if(error){
+      mostrarMensagem("error", "Erro ao registrar manutenção. Tente novamente.");
+      console.log(error);
+    } else {
+      mostrarMensagem("success", "✅ Problema registrado com sucesso.");
+      descricaoEl.value = "";
+      contadorEl.textContent = "0/200";
+    }
 
-async function registrar(){
-
-let descricao = document.getElementById("descricao").value
-
-if(!descricao){
-
-alert("Descreva o problema")
-
-return
-
-}
-
-const { error } = await supabaseClient
-.from("manutencao_academia")
-.insert([
-{
-maquina_id: maquinaId,
-descricao: descricao,
-data: new Date(),
-status: "aberto"
-}
-])
-
-if(error){
-
-alert("Erro ao registrar manutenção")
-console.log(error)
-
-}else{
-
-document.getElementById("msg").innerText =
-"✅ Problema registrado com sucesso"
-
-document.getElementById("descricao").value=""
-
-}
-
-}
-
+    botaoEl.disabled = false;
+    botaoEl.textContent = "Registrar problema";
+  }
 </script>
 
 </body>
