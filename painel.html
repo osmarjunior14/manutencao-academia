@@ -195,7 +195,7 @@ let manutencoes=[]
 async function carregar(){
 
 const { data } = await supabaseClient
-.from("manutencao-academia")
+.from("manutencao_academia")
 .select("*")
 .order("data",{ascending:false})
 
@@ -276,7 +276,7 @@ fotoInput.onchange=async function(){
 let file=fotoInput.files[0]
 
 await supabaseClient
-.from("manutencao-academia")
+.from("manutencao_academia")
 .update({status:"resolvido"})
 .eq("id",id)
 
@@ -306,7 +306,7 @@ let confirmar = confirm("Tem certeza que deseja apagar este registro?")
 if(!confirmar) return
 
 const { error } = await supabaseClient
-.from("manutencao-academia")
+.from("manutencao_academia")
 .delete()
 .eq("id", id)
 
