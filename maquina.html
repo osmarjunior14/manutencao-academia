@@ -431,10 +431,11 @@
       // Envia notificação para o Telegram
       try {
         await fetch("https://chyomxetiloktyepjbtk.supabase.co/functions/v1/super-function", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + supabaseKey
+      },
           body: JSON.stringify({
             maquina: nomeMaquina + " - " + maquinaId,
             descricao: descricao,
