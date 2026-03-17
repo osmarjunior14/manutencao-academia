@@ -1,153 +1,612 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Registrar manutenção</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registrar manutenção</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-body{
-  min-height:100vh;
-  font-family:Arial, sans-serif;
-  background:#0b1838;
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+  <style>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-.card{
-  width:100%;
-  max-width:400px;
-  background:#111c35;
-  padding:20px;
-  border-radius:20px;
-}
+    body{
+      min-height:100vh;
+      font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #163a74 0%, #0b1838 45%, #071126 100%);
+      color:#ffffff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px 16px;
+    }
 
-.select-field, textarea{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:none;
-  margin-top:10px;
-}
+    .wrapper{
+      width:100%;
+      max-width:460px;
+    }
 
-.button{
-  width:100%;
-  margin-top:20px;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  background:#22c55e;
-  color:white;
-  font-weight:bold;
-}
+    .card{
+      background:rgba(17, 28, 53, 0.92);
+      border:1px solid rgba(255,255,255,0.08);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      border-radius:28px;
+      padding:28px 20px 22px;
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    }
 
-.message{
-  margin-top:10px;
-}
-</style>
+    .header{
+      text-align:center;
+      margin-bottom:22px;
+    }
+
+    .header .badge-top{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(34,197,94,0.14);
+      color:#86efac;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:14px;
+      letter-spacing:0.2px;
+    }
+
+    .header h1{
+      font-size:34px;
+      line-height:1.05;
+      font-weight:800;
+      letter-spacing:-0.8px;
+      margin-bottom:8px;
+    }
+
+    .header p{
+      color:rgba(255,255,255,0.72);
+      font-size:15px;
+      line-height:1.45;
+    }
+
+    .machine-box{
+      margin-top:6px;
+      margin-bottom:18px;
+      padding:16px 16px;
+      border-radius:20px;
+      background:linear-gradient(135deg, #27b8f5 0%, #1490e6 100%);
+      box-shadow:0 14px 30px rgba(20,144,230,0.28);
+    }
+
+    .machine-label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      font-weight:700;
+      opacity:0.85;
+      margin-bottom:6px;
+    }
+
+    .machine-name{
+      font-size:27px;
+      font-weight:800;
+      line-height:1.1;
+      letter-spacing:-0.5px;
+      word-break:break-word;
+    }
+
+    .form-group{
+      margin-top:14px;
+    }
+
+    .field-label{
+      display:block;
+      font-size:14px;
+      font-weight:700;
+      color:rgba(255,255,255,0.86);
+      margin-bottom:10px;
+    }
+
+    .select-field,
+    textarea{
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius:20px;
+      padding:18px 16px;
+      background:#f7f8fb;
+      color:#0f172a;
+      font-size:17px;
+      line-height:1.45;
+      box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    textarea{
+      min-height:150px;
+      resize:none;
+    }
+
+    textarea::placeholder{
+      color:#94a3b8;
+    }
+
+    .helper{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:8px;
+      font-size:13px;
+      color:rgba(255,255,255,0.62);
+    }
+
+    .button{
+      width:100%;
+      margin-top:18px;
+      border:none;
+      border-radius:20px;
+      padding:18px 20px;
+      background:linear-gradient(135deg, #31d66b 0%, #22c55e 100%);
+      color:white;
+      font-size:22px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 14px 30px rgba(34,197,94,0.28);
+      transition:transform .12s ease, filter .12s ease;
+    }
+
+    .button:active{
+      transform:scale(0.985);
+      filter:brightness(0.98);
+    }
+
+    .button:disabled{
+      opacity:0.7;
+      cursor:not-allowed;
+    }
+
+    .message{
+      display:none;
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:16px;
+      font-size:15px;
+      font-weight:700;
+      line-height:1.4;
+    }
+
+    .message.success{
+      display:block;
+      background:rgba(34,197,94,0.14);
+      color:#86efac;
+      border:1px solid rgba(34,197,94,0.25);
+    }
+
+    .message.error{
+      display:block;
+      background:rgba(239,68,68,0.14);
+      color:#fca5a5;
+      border:1px solid rgba(239,68,68,0.24);
+    }
+
+    .footer-note{
+      text-align:center;
+      margin-top:18px;
+      color:rgba(255,255,255,0.45);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    @media (max-width: 430px){
+      .card{
+        border-radius:24px;
+        padding:24px 16px 20px;
+      }
+
+      .header h1{
+        font-size:29px;
+      }
+
+      .machine-name{
+        font-size:23px;
+      }
+
+      .button{
+        font-size:20px;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="card">
+<div class="wrapper">
+  <div class="card">
 
-<h2>Registrar manutenção</h2>
+    <div class="header">
+      <div class="badge-top">● Sistema de Manutenção - DUO Academia</div>
+      <h1>Registrar Manutenção</h1>
+      <p>Selecione o tipo de problema encontrado neste equipamento.</p>
+    </div>
 
-<div id="maquina"></div>
+    <div class="machine-box">
+      <div class="machine-label">Equipamento</div>
+      <div class="machine-name" id="maquina"></div>
+    </div>
 
-<select id="tipoProblema" class="select-field" onchange="alternarOutro()">
-  <option value="">Selecione o problema</option>
-  <option value="barulho_anormal">Barulho anormal</option>
-  <option value="cabo_rompido">Cabo rompido</option>
-  <option value="choque_eletrico">Choque elétrico</option>
-  <option value="corrente_ou_correia_com_defeito">Corrente/correia com defeito</option>
-  <option value="equipamento_travando">Equipamento travando</option>
-  <option value="estrutura_solta">Estrutura solta</option>
-  <option value="estofado_rasgado">Estofado rasgado</option>
-  <option value="lubrificacao_necessaria">Lubrificação necessária</option>
-  <option value="painel_ou_display_com_defeito">Painel/display com defeito</option>
-  <option value="parafuso_frouxo">Parafuso frouxo</option>
-  <option value="pino_de_ajuste_quebrado">Pino de ajuste quebrado</option>
-  <option value="polia_com_defeito">Polia com defeito</option>
-  <option value="regulagem_com_defeito">Regulagem com defeito</option>
-  <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
-  <option value="outro">Outro</option>
-</select>
+    <div class="form-group">
+      <label class="field-label" for="tipoProblema">Tipo de problema</label>
 
-<div id="outroBox" style="display:none;">
-  <textarea id="outroProblema" placeholder="Descreva o problema"></textarea>
-</div>
+      <select id="tipoProblema" class="select-field" onchange="alternarOutro()">
+        <option value="">Selecione o problema</option>
+        <option value="barulho_anormal">Barulho anormal</option>
+        <option value="cabo_rompido">Cabo rompido</option>
+        <option value="choque_eletrico">Choque elétrico</option>
+        <option value="corrente_ou_correia_com_defeito">Corrente/correia com defeito</option>
+        <option value="equipamento_travando">Equipamento travando</option>
+        <option value="estrutura_solta">Estrutura solta</option>
+        <option value="estofado_rasgado">Estofado rasgado</option>
+        <option value="lubrificacao_necessaria">Lubrificação necessária</option>
+        <option value="painel_ou_display_com_defeito">Painel/display com defeito</option>
+        <option value="parafuso_frouxo">Parafuso frouxo</option>
+        <option value="pino_de_ajuste_quebrado">Pino de ajuste quebrado</option>
+        <option value="polia_com_defeito">Polia com defeito</option>
+        <option value="regulagem_com_defeito">Regulagem com defeito</option>
+        <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
 
-<button class="button" onclick="registrar()">Registrar</button>
+    <div class="form-group" id="outroBox" style="display:none;">
+      <label class="field-label" for="outroProblema">Descreva o problema</label>
+      <textarea
+        id="outroProblema"
+        maxlength="200"
+        placeholder="Descreva o problema..."
+      ></textarea>
 
-<div id="msg" class="message"></div>
+      <div class="helper">
+        <span>Máximo de 200 caracteres</span>
+        <span id="contadorCaracteres">0/200</span>
+      </div>
+    </div>
 
+    <button class="button" id="botaoRegistrar" onclick="registrar()">
+      Registrar
+    </button>
+
+    <div id="msg" class="message"></div>
+
+    <div class="footer-note">
+      Seu registro será enviado para a equipe de manutenção.
+    </div>
+
+  </div>
 </div>
 
 <script>
-const supabase = window.supabase.createClient(
-  "https://chyomxetiloktyepjbtk.supabase.co",
-  "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
-);
+  const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
+  const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
+  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-const params = new URLSearchParams(window.location.search);
-const maquinaId = params.get("id");
+  const params = new URLSearchParams(window.location.search);
+  const maquinaId = params.get("id");
 
-document.getElementById("maquina").innerText = "Máquina: " + maquinaId;
+  const maquinas = {
+    // DUO HELIÓPOLIS
+    "1":"DUO HELIÓPOLIS - MESA FLEXORA",
+    "2":"DUO HELIÓPOLIS - MESA FLEXORA",
+    "3":"DUO HELIÓPOLIS - APOLETE",
+    "4":"DUO HELIÓPOLIS - FLEXORA VERTICAL ARTICULADA",
+    "5":"DUO HELIÓPOLIS - ELEVAÇÃO PÉLVICA ARTICULADA",
+    "6":"DUO HELIÓPOLIS - CADEIRA FLEXORA",
+    "7":"DUO HELIÓPOLIS - BANCO HORIZONTAL",
+    "8":"DUO HELIÓPOLIS - CAVALINHO LIVRE",
+    "9":"DUO HELIÓPOLIS - AGACHAMENTO LIVRE",
+    "10":"DUO HELIÓPOLIS - CADEIRA FLEXORA",
+    "11":"DUO HELIÓPOLIS - LEG PRESS 45º",
+    "14":"DUO HELIÓPOLIS - LEG PRESS 45º",
+    "15":"DUO HELIÓPOLIS - CADEIRA EXTENSORA",
+    "16":"DUO HELIÓPOLIS - CADEIRA EXTENSORA",
+    "17":"DUO HELIÓPOLIS - SMITH MACHINE",
+    "18":"DUO HELIÓPOLIS - SMITH MACHINE",
+    "19":"DUO HELIÓPOLIS - CADEIRA EXTENSORA",
+    "20":"DUO HELIÓPOLIS - CADEIRA EXTENSORA",
+    "21":"DUO HELIÓPOLIS - LEG PRESS 45º",
+    "23":"DUO HELIÓPOLIS - LEG PRESS 180º",
+    "24":"DUO HELIÓPOLIS - PUXADA ALTA CROSS MULTI ESTAÇÃO",
+    "25":"DUO HELIÓPOLIS - POLIA EXTERNA CROSS MULTI ESTAÇÃO",
+    "26":"DUO HELIÓPOLIS - REMADA BAIXA CROSS MULTI ESTAÇÃO",
+    "27":"DUO HELIÓPOLIS - PUXADA ALTA CROSS MULTI ESTAÇÃO",
+    "28":"DUO HELIÓPOLIS - POLIA EXTERNA CROSS MULTI ESTAÇÃO",
+    "29":"DUO HELIÓPOLIS - REMADA BAIXA CROSS MULTI ESTAÇÃO",
+    "30":"DUO HELIÓPOLIS - AGACHAMENTO HACK",
+    "31":"DUO HELIÓPOLIS - SMITH MACHINE",
+    "34":"DUO HELIÓPOLIS - LEG PRESS 180º",
+    "35":"DUO HELIÓPOLIS - CALF MACHINE",
+    "36":"DUO HELIÓPOLIS - SENTADILHA",
+    "37":"DUO HELIÓPOLIS - REMADA MÁQUINA",
+    "38":"DUO HELIÓPOLIS - CAVALINHO ARTICULADO",
+    "39":"DUO HELIÓPOLIS - HACK INVERTIDO",
+    "40":"DUO HELIÓPOLIS - BELT SQUAT",
+    "41":"DUO HELIÓPOLIS - DESENVOLVIMENTO ARTICULADO",
+    "42":"DUO HELIÓPOLIS - DESENVOLVIMENTO ARTICULADO",
+    "43":"DUO HELIÓPOLIS - SCOTT ARTICULADO",
+    "44":"DUO HELIÓPOLIS - ROSCA DIRETA MÁQUINA",
+    "45":"DUO HELIÓPOLIS - SUPINO HORIZONTAL ARTICULADO",
+    "46":"DUO HELIÓPOLIS - PUXADOR REMADOR",
+    "47":"DUO HELIÓPOLIS - PUXADOR/REMADOR",
+    "48":"DUO HELIÓPOLIS - PUXADA ALTA ARTICULADA",
+    "49":"DUO HELIÓPOLIS - PUXADA ALTA ARTICULADA",
+    "50":"DUO HELIÓPOLIS - REMADA ARTICULADA",
+    "51":"DUO HELIÓPOLIS - BANCO SCOTT",
+    "52":"DUO HELIÓPOLIS - REMADA BAIXA ARTICULADA",
+    "53":"DUO HELIÓPOLIS - AFUNDO ARTICULADO",
+    "54":"DUO HELIÓPOLIS - SUPINO INCLINADO ARTICULADO",
+    "55":"DUO HELIÓPOLIS - SUPINO VERTICAL ARTICULADO",
+    "56":"DUO HELIÓPOLIS - PARALELA ARTICULADA",
+    "57":"DUO HELIÓPOLIS - GRAVITON",
+    "58":"DUO HELIÓPOLIS - VOADOR",
+    "59":"DUO HELIÓPOLIS - SUPINO DECLINADO",
+    "60":"DUO HELIÓPOLIS - VOADOR",
+    "61":"DUO HELIÓPOLIS - ELÍPTICO",
+    "62":"DUO HELIÓPOLIS - ELÍPTICO",
+    "63":"DUO HELIÓPOLIS - CADEIRA ABDUTORA",
+    "64":"DUO HELIÓPOLIS - CADEIRA ADUTORA",
+    "65":"DUO HELIÓPOLIS - SUPINO INCLINADO",
+    "66":"DUO HELIÓPOLIS - BICICLETA SPINNING",
+    "67":"DUO HELIÓPOLIS - BICICLETA SPINNING",
+    "68":"DUO HELIÓPOLIS - BICICLETA VERTICAL",
+    "69":"DUO HELIÓPOLIS - SIMULADOR DE ESCADA",
+    "70":"DUO HELIÓPOLIS - SIMULADOR DE ESCADA",
+    "71":"DUO HELIÓPOLIS - BICICLETA VERTICAL",
+    "72":"DUO HELIÓPOLIS - BICICLETA HORIZONTAL",
+    "73":"DUO HELIÓPOLIS - SUPINO HORIZONTAL",
+    "74":"DUO HELIÓPOLIS - SUPINO HORIZONTAL",
+    "75":"DUO HELIÓPOLIS - ESTEIRA",
+    "76":"DUO HELIÓPOLIS - ESTEIRA",
+    "77":"DUO HELIÓPOLIS - ESTEIRA",
+    "78":"DUO HELIÓPOLIS - ESTEIRA",
+    "79":"DUO HELIÓPOLIS - ESTEIRA",
+    "80":"DUO HELIÓPOLIS - ESTEIRA",
+    "81":"DUO HELIÓPOLIS - ESTEIRA",
+    "82":"DUO HELIÓPOLIS - ESTEIRA",
+    "83":"DUO HELIÓPOLIS - ESTEIRA",
+    "84":"DUO HELIÓPOLIS - ESTEIRA",
+    "85":"DUO HELIÓPOLIS - ESTEIRA",
+    "86":"DUO HELIÓPOLIS - ESTEIRA",
+    "87":"DUO HELIÓPOLIS - ESTEIRA",
+    "88":"DUO HELIÓPOLIS - ESTEIRA",
+    "89":"DUO HELIÓPOLIS - ESTEIRA",
+    "90":"DUO HELIÓPOLIS - ESTEIRA",
+    "91":"DUO HELIÓPOLIS - BANCO HORIZONTAL",
+    "92":"DUO HELIÓPOLIS - SIMULADOR DE REMO",
+    "93":"DUO HELIÓPOLIS - AIR BIKE",
+    "94":"DUO HELIÓPOLIS - BANCO ROMANO",
+    "95":"DUO HELIÓPOLIS - CADEIRA ADUTORA",
+    "96":"DUO HELIÓPOLIS - CADEIRA ABDUTORA",
+    "97":"DUO HELIÓPOLIS - BICICLETA HORIZONTAL",
+    "98":"DUO HELIÓPOLIS - BICICLETA VERTICAL",
+    "99":"DUO HELIÓPOLIS - ESTEIRA CURVA",
+    "100":"DUO HELIÓPOLIS - SUPORTE PARA ELEVAÇÃO PÉLVICA",
+    "12.A":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA A)",
+    "12.B":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA B)",
+    "13.A":"DUO HELIÓPOLIS - CROSS OVER ANGULAR (POLIA A)",
+    "13.B":"DUO HELIÓPOLIS - CROSS OVER ANGULAR (POLIA B)",
+    "22.A":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA A)",
+    "22.B":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA B)",
+    "32.A":"DUO HELIÓPOLIS - CROSS OVER MULTI ESTAÇÃO (POLIA A)",
+    "32.B":"DUO HELIÓPOLIS - CROSS OVER MULTI ESTAÇÃO (POLIA B)",
 
-function alternarOutro(){
-  const tipo = document.getElementById("tipoProblema").value;
-  document.getElementById("outroBox").style.display =
-    tipo === "outro" ? "block" : "none";
-}
+    // DUO CENTRO
+    "centro-1":"DUO CENTRO - CADEIRA ADUTORA",
+    "centro-2":"DUO CENTRO - CADEIRA ABDUTORA",
+    "centro-3":"DUO CENTRO - MESA FLEXORA",
+    "centro-4":"DUO CENTRO - CADEIRA EXTENSORA",
+    "centro-5":"DUO CENTRO - CADEIRA EXTENSORA",
+    "centro-6":"DUO CENTRO - CADEIRA EXTENSORA",
+    "centro-7":"DUO CENTRO - CADEIRA FLEXORA",
+    "centro-8":"DUO CENTRO - VOADOR",
+    "centro-9":"DUO CENTRO - VOADOR",
+    "centro-10":"DUO CENTRO - PUXADOR/REMADOR",
+    "centro-11":"DUO CENTRO - PUXADOR/REMADOR",
+    "centro-12":"DUO CENTRO - PUXADOR/REMADOR",
+    "centro-13":"DUO CENTRO - BICICLETA SPINNING",
+    "centro-14":"DUO CENTRO - BICICLETA SPINNING",
+    "centro-15":"DUO CENTRO - BICICLETA HORIZONTAL",
+    "centro-16":"DUO CENTRO - ESTEIRA",
+    "centro-17":"DUO CENTRO - ESTEIRA",
+    "centro-18":"DUO CENTRO - ESTEIRA",
+    "centro-19":"DUO CENTRO - ESTEIRA",
+    "centro-20":"DUO CENTRO - ESTEIRA",
+    "centro-21":"DUO CENTRO - ESTEIRA",
+    "centro-22":"DUO CENTRO - ESTEIRA",
+    "centro-23":"DUO CENTRO - ESTEIRA",
+    "centro-24":"DUO CENTRO - ESTEIRA",
+    "centro-25":"DUO CENTRO - ESTEIRA",
+    "centro-26":"DUO CENTRO - ESCADA",
+    "centro-27":"DUO CENTRO - ELÍPTICO",
+    "centro-28":"DUO CENTRO - ELÍPTICO",
+    "centro-29":"DUO CENTRO - FLEXORA VERTICAL ARTICULADA",
+    "centro-30":"DUO CENTRO - AGACHAMENTO LIVRE",
+    "centro-31":"DUO CENTRO - AGACHAMENTO LIVRE",
+    "centro-32":"DUO CENTRO - SMITH MACHINE",
+    "centro-33":"DUO CENTRO - AFUNDO ARTICULADO",
+    "centro-34":"DUO CENTRO - ELEVAÇÃO PÉLVICA ARTICULADA",
+    "centro-35":"DUO CENTRO - HACK INVERTIDO",
+    "centro-36":"DUO CENTRO - SENTADILHA",
+    "centro-37":"DUO CENTRO - LEG PRESS 180°",
+    "centro-38":"DUO CENTRO - LEG PRESS 45°",
+    "centro-39":"DUO CENTRO - LEG PRESS 45°",
+    "centro-40":"DUO CENTRO - REMADA BAIXA CROSS MULTI ESTAÇÃO",
+    "centro-41":"DUO CENTRO - POLIA EXTERNA CROSS MULTI ESTAÇÃO",
+    "centro-42":"DUO CENTRO - PUXADA ALTA CROSS MULTI ESTAÇÃO",
+    "centro-43.A":"DUO CENTRO - CROSS OVER MULTI ESTAÇÃO (POLIA A)",
+    "centro-43.B":"DUO CENTRO - CROSS OVER MULTI ESTAÇÃO (POLIA B)",
+    "centro-44":"DUO CENTRO - BANCO SCOTT",
+    "centro-45.A":"DUO CENTRO - CROSS OVER ANGULAR (POLIA A)",
+    "centro-45.B":"DUO CENTRO - CROSS OVER ANGULAR (POLIA B)",
+    "centro-46":"DUO CENTRO - REMADA BAIXA CROSS MULTI ESTAÇÃO",
+    "centro-47":"DUO CENTRO - PUXADA ALTA CROSS MULTI ESTAÇÃO",
+    "centro-48":"DUO CENTRO - POLIA EXTERNA CROSS MULTI ESTAÇÃO",
+    "centro-49":"DUO CENTRO - SUPINO INCLINADO",
+    "centro-50":"DUO CENTRO - SUPINO DECLINADO",
+    "centro-51":"DUO CENTRO - SUPINO HORIZONTAL",
+    "centro-52.A":"DUO CENTRO - CROSS OVER ANGULAR (POLIA A)",
+    "centro-52.B":"DUO CENTRO - CROSS OVER ANGULAR (POLIA B)",
+    "centro-53":"DUO CENTRO - SUPINO VERTICAL ARTICULADO",
+    "centro-54":"DUO CENTRO - PUXADA ALTA COM ELEVAÇÃO",
+    "centro-55":"DUO CENTRO - DESENVOLVIMENTO ARTICULADO",
+    "centro-56":"DUO CENTRO - REMADA BAIXA ARTICULADA",
+    "centro-57":"DUO CENTRO - PUXADA HAMMER",
+    "centro-58":"DUO CENTRO - CAVALINHO ARTICULADO",
+    "centro-59":"DUO CENTRO - REMADA ARTICULADA",
+    "centro-60":"DUO CENTRO - AIR BIKE",
+    "centro-61":"DUO CENTRO - CALF MACHINE",
+    "centro-62":"DUO CENTRO - AGACHAMENTO HACK",
+    "centro-64":"DUO CENTRO - AGACHAMENTO HACK",
+    "centro-65":"DUO CENTRO - CADEIRA ADUTORA",
+    "centro-66":"DUO CENTRO - CADEIRA ABDUTORA",
+    "centro-67":"DUO CENTRO - SUPINO INCLINADO ARTICULADO",
+    "centro-68":"DUO CENTRO - SUPINO HORIZONTAL ARTICULADO",
+    "centro-69":"DUO CENTRO - ESTEIRA CURVA",
+    "centro-70":"DUO CENTRO - SIMULADOR DE REMO",
+    "centro-71":"DUO CENTRO - BICICLETA VERTICAL",
+    "centro-72":"DUO CENTRO - BICICLETA HORIZONTAL",
+    "centro-73":"DUO CENTRO - LEG PRESS 180 BIARTICULADO"
+  };
 
-async function registrar(){
+  const tipoProblemaMap = {
+    "barulho_anormal":"Barulho anormal",
+    "cabo_rompido":"Cabo rompido",
+    "choque_eletrico":"Choque elétrico",
+    "corrente_ou_correia_com_defeito":"Corrente/correia com defeito",
+    "equipamento_travando":"Equipamento travando",
+    "estrutura_solta":"Estrutura solta",
+    "estofado_rasgado":"Estofado rasgado",
+    "lubrificacao_necessaria":"Lubrificação necessária",
+    "painel_ou_display_com_defeito":"Painel/display com defeito",
+    "parafuso_frouxo":"Parafuso frouxo",
+    "pino_de_ajuste_quebrado":"Pino de ajuste quebrado",
+    "polia_com_defeito":"Polia com defeito",
+    "regulagem_com_defeito":"Regulagem com defeito",
+    "sem_carga_ou_resistencia":"Sem carga ou resistência",
+    "outro":"Outro"
+  };
 
-  const tipoProblema = document.getElementById("tipoProblema").value;
-  const outroProblema = document.getElementById("outroProblema").value.trim();
+  const nomeMaquina = maquinas[maquinaId] || "Máquina não encontrada";
+  document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
 
-  if(!tipoProblema){
-    alert("Selecione o problema");
-    return;
-  }
+  const tipoProblemaEl = document.getElementById("tipoProblema");
+  const outroProblemaEl = document.getElementById("outroProblema");
+  const contadorEl = document.getElementById("contadorCaracteres");
+  const msgEl = document.getElementById("msg");
+  const botaoEl = document.getElementById("botaoRegistrar");
 
-  const descricao = tipoProblema === "outro" ? outroProblema : "";
-
-  const { error } = await supabase
-    .from("manutencao_academia")
-    .insert([
-      {
-        maquina_id: maquinaId,
-        tipo_problema: tipoProblema,
-        descricao: descricao,
-        data: new Date().toISOString(),
-        status: "aberto"
-      }
-    ]);
-
-  if(error){
-    alert("Erro ao registrar");
-    console.log(error);
-    return;
-  }
-
-  // TELEGRAM
-  await fetch("https://chyomxetiloktyepjbtk.supabase.co/functions/v1/super-function", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      maquina: maquinaId,
-      descricao: tipoProblema === "outro" ? outroProblema : tipoProblema,
-      data: new Date().toLocaleString("pt-BR")
-    })
+  outroProblemaEl.addEventListener("input", () => {
+    contadorEl.textContent = `${outroProblemaEl.value.length}/200`;
   });
 
-  alert("Registrado com sucesso");
-}
+  function alternarOutro(){
+    const tipo = tipoProblemaEl.value;
+    const outroBox = document.getElementById("outroBox");
+
+    if(tipo === "outro"){
+      outroBox.style.display = "block";
+    } else {
+      outroBox.style.display = "none";
+      outroProblemaEl.value = "";
+      contadorEl.textContent = "0/200";
+    }
+  }
+
+  function mostrarMensagem(tipo, texto){
+    msgEl.className = `message ${tipo}`;
+    msgEl.textContent = texto;
+  }
+
+  async function registrar(){
+    const tipoProblema = tipoProblemaEl.value;
+    const outroProblema = outroProblemaEl.value.trim();
+
+    if(!maquinaId){
+      mostrarMensagem("error", "ID da máquina não encontrado na URL.");
+      return;
+    }
+
+    if(!tipoProblema){
+      mostrarMensagem("error", "Selecione o tipo de problema.");
+      return;
+    }
+
+    if(tipoProblema === "outro" && !outroProblema){
+      mostrarMensagem("error", "Descreva o problema na opção 'Outro'.");
+      return;
+    }
+
+    botaoEl.disabled = true;
+    botaoEl.textContent = "Enviando...";
+    msgEl.className = "message";
+    msgEl.textContent = "";
+
+    const descricao = tipoProblema === "outro" ? outroProblema : "";
+    const textoTelegram = tipoProblema === "outro"
+      ? `Outro - ${outroProblema}`
+      : (tipoProblemaMap[tipoProblema] || tipoProblema);
+
+    try {
+      const { error } = await supabaseClient
+        .from("manutencao_academia")
+        .insert([
+          {
+            maquina_id: maquinaId,
+            tipo_problema: tipoProblema,
+            descricao: descricao,
+            data: new Date().toISOString(),
+            status: "aberto"
+          }
+        ]);
+
+      if(error){
+        throw error;
+      }
+
+      try {
+        await fetch("https://chyomxetiloktyepjbtk.supabase.co/functions/v1/super-function", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            maquina: nomeMaquina + " - " + maquinaId,
+            descricao: textoTelegram,
+            data: new Date().toLocaleString("pt-BR")
+          })
+        });
+      } catch (erroTelegram) {
+        console.log("Erro ao enviar notificação Telegram:", erroTelegram);
+      }
+
+      mostrarMensagem("success", "✅ Problema registrado com sucesso.");
+      tipoProblemaEl.value = "";
+      outroProblemaEl.value = "";
+      document.getElementById("outroBox").style.display = "none";
+      contadorEl.textContent = "0/200";
+
+    } catch (error) {
+      mostrarMensagem("error", "Erro ao registrar manutenção. Tente novamente.");
+      console.log("Erro ao registrar:", error);
+    } finally {
+      botaoEl.disabled = false;
+      botaoEl.textContent = "Registrar";
+    }
+  }
 </script>
 
 </body>
