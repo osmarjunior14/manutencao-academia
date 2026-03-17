@@ -368,10 +368,13 @@
     if(!confirmar) return;
 
     const { data: dadosAtualizados, error } = await supabaseClient
-      .from("manutencao_academia")
-      .update({ status: "resolvido" })
-      .eq("id", id)
-      .select();
+    .from("manutencao_academia")
+    .update({
+    status: "resolvido",
+    data_resolucao: new Date().toISOString()
+    })
+    .eq("id", id)
+    .select();
 
     if(error){
       alert("Erro ao resolver manutenção: " + error.message);
