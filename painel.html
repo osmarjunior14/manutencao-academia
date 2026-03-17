@@ -9,97 +9,132 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body{
-      background:#f4f6f9;
-      font-family:Arial, sans-serif;
-    }
+body{
+  background: linear-gradient(135deg, #eef2f7, #e6ecf5);
+  font-family: 'Inter', Arial, sans-serif;
+}
 
-    .card-maquina{
-      border-left:6px solid #dc3545;
-    }
+/* HEADER */
+h3{
+  font-weight:800;
+  letter-spacing:-0.5px;
+}
 
-    .card-resolvido{
-      border-left:6px solid #28a745;
-    }
+/* DASHBOARD */
+.card-metrica{
+  flex:1;
+  min-width:180px;
+  padding:18px;
+  border-radius:14px;
+  color:white;
+  font-weight:600;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  transition:.2s;
+}
 
-    .botao{
-      width:100%;
-      margin-top:6px;
-    }
+.card-metrica:hover{
+  transform:translateY(-3px);
+}
 
-    .status-texto{
-      display:inline-block;
-      margin-top:8px;
-      font-weight:bold;
-    }
+.card-metrica:nth-child(1){ background:#1e293b; }
+.card-metrica:nth-child(2){ background:#dc3545; }
+.card-metrica:nth-child(3){ background:#28a745; }
+.card-metrica:nth-child(4){ background:#0d6efd; }
 
-    .vazio{
-      background:#fff;
-      border-radius:10px;
-      padding:16px;
-      color:#666;
-      border:1px dashed #ccc;
-      margin-bottom:12px;
-    }
+.card-metrica span{
+  display:block;
+  font-size:28px;
+  font-weight:800;
+  margin-top:6px;
+}
 
-    .card-metrica{
-      background:#1e293b;
-      color:white;
-      padding:12px 18px;
-      border-radius:10px;
-      font-weight:bold;
-      min-width:180px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.08);
-    }
+/* CARD PADRÃO */
+.card{
+  border:none;
+  border-radius:14px;
+  transition:.2s;
+}
 
-    .linha-filtros{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
-    }
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
 
-    .linha-filtros .form-control,
-    .linha-filtros .form-select{
-      max-width:320px;
-    }
+/* BORDA STATUS */
+.card-maquina{
+  border-left:6px solid #dc3545;
+}
 
-    .card-dashboard{
-      background:#fff;
-      border-radius:12px;
-      padding:18px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.08);
-      margin-bottom:20px;
-    }
+.card-resolvido{
+  border-left:6px solid #28a745;
+}
 
-    .ranking-item{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:10px 0;
-      border-bottom:1px solid #ececec;
-      gap:12px;
-    }
+/* BOTÕES */
+.botao{
+  width:100%;
+  margin-top:8px;
+  border-radius:10px;
+  font-weight:600;
+}
 
-    .ranking-item:last-child{
-      border-bottom:none;
-    }
+/* BADGES */
+.badge{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+}
 
-    .ranking-label{
-      font-weight:600;
-      color:#1f2937;
-    }
+/* VAZIO */
+.vazio{
+  background:#fff;
+  border-radius:12px;
+  padding:18px;
+  color:#777;
+  border:1px dashed #dcdcdc;
+}
 
-    .ranking-badge{
-      background:#0d6efd;
-      color:#fff;
-      border-radius:999px;
-      padding:4px 10px;
-      font-size:13px;
-      font-weight:700;
-      white-space:nowrap;
-    }
-  </style>
+/* DASHBOARD PROBLEMAS */
+.card-dashboard{
+  background:#fff;
+  border-radius:14px;
+  padding:18px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.05);
+}
+
+.ranking-item{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #f1f1f1;
+}
+
+.ranking-item:last-child{
+  border-bottom:none;
+}
+
+.ranking-label{
+  font-weight:600;
+}
+
+.ranking-badge{
+  background:#0d6efd;
+  color:#fff;
+  border-radius:999px;
+  padding:4px 10px;
+  font-size:12px;
+  font-weight:700;
+}
+
+/* INPUTS */
+.form-control, .form-select{
+  border-radius:10px;
+  border:1px solid #dcdcdc;
+}
+
+.form-control:focus, .form-select:focus{
+  box-shadow:0 0 0 2px rgba(13,110,253,0.2);
+}
+</style>
 </head>
 <body>
 
