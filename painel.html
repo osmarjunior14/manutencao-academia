@@ -63,6 +63,42 @@
     .linha-filtros .form-select{
       max-width:320px;
     }
+
+    .card-dashboard{
+      background:#fff;
+      border-radius:12px;
+      padding:18px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom:20px;
+    }
+
+    .ranking-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 0;
+      border-bottom:1px solid #ececec;
+      gap:12px;
+    }
+
+    .ranking-item:last-child{
+      border-bottom:none;
+    }
+
+    .ranking-label{
+      font-weight:600;
+      color:#1f2937;
+    }
+
+    .ranking-badge{
+      background:#0d6efd;
+      color:#fff;
+      border-radius:999px;
+      padding:4px 10px;
+      font-size:13px;
+      font-weight:700;
+      white-space:nowrap;
+    }
   </style>
 </head>
 <body>
@@ -98,6 +134,11 @@
     </select>
   </div>
 
+  <div class="card-dashboard">
+    <h5 class="mb-3">Tipos de problema mais frequentes</h5>
+    <div id="rankingProblemas"></div>
+  </div>
+
   <h5>Manutenções em aberto</h5>
   <div id="listaAbertos"></div>
 
@@ -116,11 +157,27 @@
   const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+  const tiposProblema = {
+    "barulho_anormal":"Barulho anormal",
+    "cabo_rompido":"Cabo rompido",
+    "choque_eletrico":"Choque elétrico",
+    "corrente_ou_correia_com_defeito":"Corrente/correia com defeito",
+    "equipamento_travando":"Equipamento travando",
+    "estrutura_solta":"Estrutura solta",
+    "estofado_rasgado":"Estofado rasgado",
+    "lubrificacao_necessaria":"Lubrificação necessária",
+    "painel_ou_display_com_defeito":"Painel/display com defeito",
+    "parafuso_frouxo":"Parafuso frouxo",
+    "pino_de_ajuste_quebrado":"Pino de ajuste quebrado",
+    "polia_com_defeito":"Polia com defeito",
+    "regulagem_com_defeito":"Regulagem com defeito",
+    "sem_carga_ou_resistencia":"Sem carga ou resistência",
+    "outro":"Outro"
+  };
+
   const maquinas = {
 
-    // =========================
-    // DUO HELIÓPOLIS (SEM PREFIXO)
-    // =========================
+    // DUO HELIÓPOLIS
     "1":"DUO HELIÓPOLIS - MESA FLEXORA",
     "2":"DUO HELIÓPOLIS - MESA FLEXORA",
     "3":"DUO HELIÓPOLIS - APOLETE",
@@ -216,7 +273,6 @@
     "98":"DUO HELIÓPOLIS - BICICLETA VERTICAL",
     "99":"DUO HELIÓPOLIS - ESTEIRA CURVA",
     "100":"DUO HELIÓPOLIS - SUPORTE PARA ELEVAÇÃO PÉLVICA",
-
     "12.A":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA A)",
     "12.B":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA B)",
     "13.A":"DUO HELIÓPOLIS - CROSS OVER ANGULAR (POLIA A)",
@@ -226,9 +282,7 @@
     "32.A":"DUO HELIÓPOLIS - CROSS OVER MULTI ESTAÇÃO (POLIA A)",
     "32.B":"DUO HELIÓPOLIS - CROSS OVER MULTI ESTAÇÃO (POLIA B)",
 
-    // =========================
-    // DUO CENTRO (COM PREFIXO)
-    // =========================
+    // DUO CENTRO
     "centro-1":"DUO CENTRO - CADEIRA ADUTORA",
     "centro-2":"DUO CENTRO - CADEIRA ABDUTORA",
     "centro-3":"DUO CENTRO - MESA FLEXORA",
@@ -324,6 +378,11 @@
     render();
   }
 
+  function formatarTipoProblema(valor){
+    if(!valor) return "";
+    return tiposProblema[valor] || valor;
+  }
+
   function obterDadosFiltrados(){
     const filtroTexto = document.getElementById("filtro").value.toLowerCase().trim();
     unidadeSelecionada = document.getElementById("filtroUnidade").value;
@@ -332,6 +391,7 @@
       const id = String(item.maquina_id || "");
       const nome = maquinas[id] || "Máquina";
       const maquinaCompleta = `${nome} - ${id}`.toLowerCase();
+      const tipoFormatado = formatarTipoProblema(item.tipo_problema).toLowerCase();
 
       if (unidadeSelecionada === "centro" && !id.includes("centro-")) {
         return false;
@@ -341,7 +401,7 @@
         return false;
       }
 
-      if (filtroTexto && !maquinaCompleta.includes(filtroTexto)) {
+      if (filtroTexto && !maquinaCompleta.includes(filtroTexto) && !tipoFormatado.includes(filtroTexto)) {
         return false;
       }
 
@@ -358,6 +418,31 @@
     document.getElementById("abertos").textContent = abertos;
     document.getElementById("resolvidos").textContent = resolvidos;
     document.getElementById("contador").innerText = abertos;
+  }
+
+  function renderRankingProblemas(dadosFiltrados){
+    const ranking = {};
+    const container = document.getElementById("rankingProblemas");
+
+    dadosFiltrados.forEach(item => {
+      const chave = item.tipo_problema || "outro";
+      ranking[chave] = (ranking[chave] || 0) + 1;
+    });
+
+    const ordenado = Object.entries(ranking)
+      .sort((a, b) => b[1] - a[1]);
+
+    if(ordenado.length === 0){
+      container.innerHTML = `<div class="vazio">Nenhum problema registrado ainda.</div>`;
+      return;
+    }
+
+    container.innerHTML = ordenado.map(([tipo, quantidade]) => `
+      <div class="ranking-item">
+        <div class="ranking-label">${formatarTipoProblema(tipo)}</div>
+        <div class="ranking-badge">${quantidade}</div>
+      </div>
+    `).join("");
   }
 
   function render(){
@@ -384,6 +469,10 @@
         ? `<span class="badge bg-danger">ABERTO</span>`
         : `<span class="badge bg-success">RESOLVIDO</span>`;
 
+      const tipoProblemaHtml = item.tipo_problema
+        ? `<div class="mt-2"><small><strong>Tipo:</strong> ${formatarTipoProblema(item.tipo_problema)}</small></div>`
+        : "";
+
       const dataResolucaoHtml = item.data_resolucao
         ? `<div class="mt-2"><small><strong>Resolvido em:</strong> ${new Date(item.data_resolucao).toLocaleString()}</small></div>`
         : "";
@@ -397,11 +486,16 @@
           <button class="btn btn-danger botao" onclick="apagar('${item.id}')">Apagar</button>
         `;
 
+      const descricaoHtml = item.descricao
+        ? `<p class="mb-2 mt-2">${item.descricao}</p>`
+        : "";
+
       const card = `
         <div class="card mb-3 shadow ${estaAberto ? "card-maquina" : "card-resolvido"}">
           <div class="card-body">
             <h5>${maquina}</h5>
-            <p class="mb-2">${item.descricao}</p>
+            ${tipoProblemaHtml}
+            ${descricaoHtml}
             <small>${new Date(item.data).toLocaleString()}</small>
             <div class="status-texto">${statusHtml}</div>
             ${dataResolucaoHtml}
@@ -430,6 +524,7 @@
     }
 
     calcularMetricas(dadosFiltrados);
+    renderRankingProblemas(dadosFiltrados);
   }
 
   async function resolver(id){
@@ -443,11 +538,13 @@
     const confirmar = confirm("Tem certeza que deseja marcar esta manutenção como resolvida?");
     if(!confirmar) return;
 
+    const dataResolucao = new Date().toISOString();
+
     const { data: dadosAtualizados, error } = await supabaseClient
       .from("manutencao_academia")
       .update({
         status: "resolvido",
-        data_resolucao: new Date().toISOString()
+        data_resolucao: dataResolucao
       })
       .eq("id", id)
       .select();
@@ -462,7 +559,7 @@
 
     manutencoes = manutencoes.map(item =>
       item.id === id
-        ? { ...item, status: "resolvido", data_resolucao: new Date().toISOString() }
+        ? { ...item, status: "resolvido", data_resolucao: dataResolucao }
         : item
     );
 
