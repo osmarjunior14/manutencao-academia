@@ -402,31 +402,60 @@
       return;
     }
 
+    if(!maquinaId){
+      mostrarMensagem("error", "ID da máquina não encontrado na URL.");
+      return;
+    }
+
     botaoEl.disabled = true;
     botaoEl.textContent = "Enviando...";
+    msgEl.className = "message";
+    msgEl.textContent = "";
 
-    const { error } = await supabaseClient
-      .from("manutencao_academia")
-      .insert([
-        {
-          maquina_id: maquinaId,
-          descricao: descricao,
-          data: new Date().toISOString(),
-          status: "aberto"
-        }
-      ]);
+    try {
+      const { error } = await supabaseClient
+        .from("manutencao_academia")
+        .insert([
+          {
+            maquina_id: maquinaId,
+            descricao: descricao,
+            data: new Date().toISOString(),
+            status: "aberto"
+          }
+        ]);
 
-    if(error){
-      mostrarMensagem("error", "Erro ao registrar manutenção. Tente novamente.");
-      console.log(error);
-    } else {
+      if(error){
+        throw error;
+      }
+
+      // Envia notificação para o Telegram
+      try {
+        await fetch("https://chyomxetiloktyepjbtk.supabase.co/functions/v1/super-function", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            maquina: nomeMaquina + " - " + maquinaId,
+            descricao: descricao,
+            data: new Date().toLocaleString("pt-BR")
+          })
+        });
+      } catch (erroTelegram) {
+        console.log("Erro ao enviar notificação Telegram:", erroTelegram);
+      }
+
       mostrarMensagem("success", "✅ Problema registrado com sucesso.");
       descricaoEl.value = "";
       contadorEl.textContent = "0/200";
-    }
 
-    botaoEl.disabled = false;
-    botaoEl.textContent = "Registrar problema";
+    } catch (error) {
+      mostrarMensagem("error", "Erro ao registrar manutenção. Tente novamente.");
+      console.log("Erro ao registrar:", error);
+    } finally {
+      botaoEl.disabled = false;
+      botaoEl.textContent = "Registrar problema";
+    }
   }
 </script>
 
