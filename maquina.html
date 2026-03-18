@@ -115,7 +115,8 @@
       margin-bottom:10px;
     }
 
-    .select-field{
+    .select-field,
+    textarea{
       width:100%;
       border:none;
       outline:none;
@@ -126,6 +127,24 @@
       font-size:17px;
       line-height:1.45;
       box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    textarea{
+      min-height:150px;
+      resize:none;
+    }
+
+    textarea::placeholder{
+      color:#94a3b8;
+    }
+
+    .helper{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:8px;
+      font-size:13px;
+      color:rgba(255,255,255,0.62);
     }
 
     .button{
@@ -224,7 +243,7 @@
     <div class="form-group">
       <label class="field-label" for="tipoProblema">Tipo de problema</label>
 
-      <select id="tipoProblema" class="select-field">
+      <select id="tipoProblema" class="select-field" onchange="alternarOutro()">
         <option value="">Selecione o problema</option>
         <option value="barulho_anormal">Barulho anormal</option>
         <option value="cabo_rompido">Cabo rompido</option>
@@ -242,7 +261,22 @@
         <option value="sem_adesivo_de_pesos">Sem adesivo de pesos</option>
         <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
         <option value="sem_estofado">Sem estofado</option>
+        <option value="outro">Outro</option>
       </select>
+    </div>
+
+    <div class="form-group" id="outroBox" style="display:none;">
+      <label class="field-label" for="outroProblema">Descreva o problema</label>
+      <textarea
+        id="outroProblema"
+        maxlength="200"
+        placeholder="Descreva o problema..."
+      ></textarea>
+
+      <div class="helper">
+        <span>Máximo de 200 caracteres</span>
+        <span id="contadorCaracteres">0/200</span>
+      </div>
     </div>
 
     <button class="button" id="botaoRegistrar" onclick="registrar()">
@@ -466,15 +500,35 @@
     "regulagem_com_defeito":"Regulagem com defeito",
     "sem_adesivo_de_pesos":"Sem adesivo de pesos",
     "sem_carga_ou_resistencia":"Sem carga ou resistência",
-    "sem_estofado":"Sem estofado"
+    "sem_estofado":"Sem estofado",
+    "outro":"Outro"
   };
 
   const nomeMaquina = maquinas[maquinaId] || "Máquina não encontrada";
   document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
 
   const tipoProblemaEl = document.getElementById("tipoProblema");
+  const outroProblemaEl = document.getElementById("outroProblema");
+  const contadorEl = document.getElementById("contadorCaracteres");
   const msgEl = document.getElementById("msg");
   const botaoEl = document.getElementById("botaoRegistrar");
+
+  outroProblemaEl.addEventListener("input", () => {
+    contadorEl.textContent = `${outroProblemaEl.value.length}/200`;
+  });
+
+  function alternarOutro(){
+    const tipo = tipoProblemaEl.value;
+    const outroBox = document.getElementById("outroBox");
+
+    if(tipo === "outro"){
+      outroBox.style.display = "block";
+    } else {
+      outroBox.style.display = "none";
+      outroProblemaEl.value = "";
+      contadorEl.textContent = "0/200";
+    }
+  }
 
   function mostrarMensagem(tipo, texto){
     msgEl.className = `message ${tipo}`;
@@ -483,6 +537,7 @@
 
   async function registrar(){
     const tipoProblema = tipoProblemaEl.value;
+    const outroProblema = outroProblemaEl.value.trim();
 
     if(!maquinaId){
       mostrarMensagem("error", "ID da máquina não encontrado na URL.");
@@ -494,13 +549,20 @@
       return;
     }
 
+    if(tipoProblema === "outro" && !outroProblema){
+      mostrarMensagem("error", "Descreva o problema na opção 'Outro'.");
+      return;
+    }
+
     botaoEl.disabled = true;
     botaoEl.textContent = "Enviando...";
     msgEl.className = "message";
     msgEl.textContent = "";
 
-    const descricao = "";
-    const textoTelegram = tipoProblemaMap[tipoProblema] || tipoProblema;
+    const descricao = tipoProblema === "outro" ? outroProblema : "";
+    const textoTelegram = tipoProblema === "outro"
+      ? `Outro - ${outroProblema}`
+      : (tipoProblemaMap[tipoProblema] || tipoProblema);
 
     try {
       const { error } = await supabaseClient
@@ -537,6 +599,9 @@
 
       mostrarMensagem("success", "✅ Problema registrado com sucesso.");
       tipoProblemaEl.value = "";
+      outroProblemaEl.value = "";
+      document.getElementById("outroBox").style.display = "none";
+      contadorEl.textContent = "0/200";
 
     } catch (error) {
       mostrarMensagem("error", "Erro ao registrar manutenção. Tente novamente.");
