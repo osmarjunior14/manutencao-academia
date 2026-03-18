@@ -32,6 +32,17 @@
       box-sizing:border-box;
     }
 
+    .btn-warning.botao{
+  background:linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  color:#fff;
+  box-shadow:0 10px 20px rgba(245,158,11,0.18);
+}
+
+.btn-warning.botao:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.02);
+  color:#fff;
+}
     body{
       background:
         radial-gradient(circle at top left, #dbeafe 0%, transparent 30%),
@@ -430,6 +441,25 @@
     "outro":"Outro"
   };
 
+  const opcoesEdicao = {
+  "barulho_anormal":"Barulho anormal",
+  "cabo_rompido":"Cabo rompido",
+  "choque_eletrico":"Choque elétrico",
+  "corrente_ou_correia_com_defeito":"Corrente/correia com defeito",
+  "equipamento_travando":"Equipamento travando",
+  "estrutura_solta":"Estrutura solta",
+  "estofado_rasgado":"Estofado rasgado",
+  "lubrificacao_necessaria":"Lubrificação necessária",
+  "painel_ou_display_com_defeito":"Painel/display com defeito",
+  "parafuso_frouxo":"Parafuso frouxo",
+  "pino_de_ajuste_quebrado":"Pino de ajuste quebrado",
+  "polia_com_defeito":"Polia com defeito",
+  "regulagem_com_defeito":"Regulagem com defeito",
+  "sem_adesivo_de_pesos":"Sem adesivo de pesos",
+  "sem_carga_ou_resistencia":"Sem carga ou resistência",
+  "sem_estofado":"Sem estofado",
+  "outro":"Outro"
+};
   const maquinas = {
 
     // =========================
@@ -777,13 +807,15 @@
         : "";
 
       const botoesHtml = estaAberto
-        ? `
-          <button class="btn btn-success botao" onclick="resolver('${item.id}')">Resolver</button>
-          <button class="btn btn-danger botao" onclick="apagar('${item.id}')">Apagar</button>
-        `
-        : `
-          <button class="btn btn-danger botao" onclick="apagar('${item.id}')">Apagar</button>
-        `;
+      ? `
+    <button class="btn btn-success botao" onclick="resolver('${item.id}')">Resolver</button>
+    <button class="btn btn-warning botao" onclick="editarRegistro('${item.id}')">Editar registro</button>
+    <button class="btn btn-danger botao" onclick="apagar('${item.id}')">Apagar</button>
+    `
+  : `
+    <button class="btn btn-warning botao" onclick="editarRegistro('${item.id}')">Editar registro</button>
+    <button class="btn btn-danger botao" onclick="apagar('${item.id}')">Apagar</button>
+  `;
 
       const descricaoHtml = item.descricao
         ? `<p class="mb-2 mt-2">${item.descricao}</p>`
@@ -892,6 +924,59 @@
     }
   }
 
+  async function editarRegistro(id){
+  const senha = prompt("Digite a senha para editar o registro:");
+
+  if(senha !== senhaAdmin){
+    alert("Senha incorreta");
+    return;
+  }
+
+  const registro = manutencoes.find(item => String(item.id) === String(id));
+
+  if(!registro){
+    alert("Registro não encontrado.");
+    return;
+  }
+
+  const listaOpcoes = Object.entries(opcoesEdicao)
+    .map(([valor, texto]) => `${valor} = ${texto}`)
+    .join("\n");
+
+  const novoTipo = prompt(
+    `Digite o código do novo tipo de problema:\n\n${listaOpcoes}`,
+    registro.tipo_problema || ""
+  );
+
+  if(!novoTipo) return;
+
+  if(!opcoesEdicao[novoTipo]){
+    alert("Tipo inválido.");
+    return;
+  }
+
+  const novaDescricao = novoTipo === "outro"
+    ? prompt("Descreva o problema:", registro.descricao || "") || ""
+    : "";
+
+  const { error } = await supabaseClient
+    .from("manutencao_academia")
+    .update({
+      tipo_problema: novoTipo,
+      descricao: novaDescricao
+    })
+    .eq("id", id);
+
+  if(error){
+    alert("Erro ao editar registro: " + error.message);
+    console.log(error);
+    return;
+  }
+
+  alert("Registro editado com sucesso");
+  carregar();
+}
+  
   document.getElementById("filtro").addEventListener("input", render);
   document.getElementById("filtroUnidade").addEventListener("change", render);
 
