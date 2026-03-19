@@ -521,7 +521,7 @@
 
   async function registrar(){
     const tipoProblema = tipoProblemaEl.value;
-    const outroProblema = outroProblemaEl.value.trim();
+    const outroProblema = outroProblemaEl.value.trim().toLowerCase();
 
     if(!maquinaId){
       mostrarMensagem("error", "ID da máquina não encontrado na URL.");
@@ -548,6 +548,35 @@
       ? `Outro - ${outroProblema}`
       : (tipoProblemaMap[tipoProblema] || tipoProblema);
 
+    // 🔒 BLOQUEIO DE DUPLICIDADE
+let consultaDuplicidade = supabaseClient
+  .from("manutencao_academia")
+  .select("id")
+  .eq("maquina_id", maquinaId)
+  .eq("tipo_problema", tipoProblema)
+  .eq("status", "aberto");
+
+if(tipoProblema === "outro"){
+  consultaDuplicidade = consultaDuplicidade.eq("descricao", outroProblema);
+}
+
+const { data: existentes, error: erroDuplicidade } = await consultaDuplicidade;
+
+if(erroDuplicidade){
+  console.log("Erro ao verificar duplicidade:", erroDuplicidade);
+  mostrarMensagem("error", "Erro ao verificar duplicidade. Tente novamente.");
+  botaoEl.disabled = false;
+  botaoEl.textContent = "Registrar";
+  return;
+}
+
+if(existentes && existentes.length > 0){
+  mostrarMensagem("error", "⚠️ Esse problema já foi registrado e ainda está em aberto.");
+  botaoEl.disabled = false;
+  botaoEl.textContent = "Registrar";
+  return;
+}
+    
     try {
       const { error } = await supabaseClient
         .from("manutencao_academia")
