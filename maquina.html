@@ -306,7 +306,7 @@
 
     <div class="machine-box">
       <div class="machine-label">Equipamento</div>
-      <div class="machine-name" id="maquina"></div>
+      <div class="machine-name" id="maquina">Carregando máquina...</div>
     </div>
 
     <div id="alertaProblemas" class="alerta-problemas">
@@ -386,189 +386,7 @@
   const params = new URLSearchParams(window.location.search);
   const maquinaId = params.get("id");
 
-  const maquinas = {
-    // DUO HELIÓPOLIS
-    "1":"DUO HELIÓPOLIS - MESA FLEXORA",
-    "2":"DUO HELIÓPOLIS - MESA FLEXORA",
-    "3":"DUO HELIÓPOLIS - APOLETE",
-    "4":"DUO HELIÓPOLIS - FLEXORA VERTICAL ARTICULADA",
-    "5":"DUO HELIÓPOLIS - ELEVAÇÃO PÉLVICA ARTICULADA",
-    "6":"DUO HELIÓPOLIS - CADEIRA FLEXORA",
-    "7":"DUO HELIÓPOLIS - BANCO HORIZONTAL",
-    "8":"DUO HELIÓPOLIS - CAVALINHO LIVRE",
-    "9":"DUO HELIÓPOLIS - AGACHAMENTO LIVRE",
-    "10":"DUO HELIÓPOLIS - CADEIRA FLEXORA",
-    "11":"DUO HELIÓPOLIS - LEG PRESS 45º",
-    "14":"DUO HELIÓPOLIS - LEG PRESS 45º",
-    "15":"DUO HELIÓPOLIS - CADEIRA EXTENSORA",
-    "16":"DUO HELIÓPOLIS - CADEIRA EXTENSORA",
-    "17":"DUO HELIÓPOLIS - SMITH MACHINE",
-    "18":"DUO HELIÓPOLIS - SMITH MACHINE",
-    "19":"DUO HELIÓPOLIS - CADEIRA EXTENSORA",
-    "20":"DUO HELIÓPOLIS - CADEIRA EXTENSORA",
-    "21":"DUO HELIÓPOLIS - LEG PRESS 45º",
-    "23":"DUO HELIÓPOLIS - LEG PRESS 180º",
-    "24":"DUO HELIÓPOLIS - PUXADA ALTA CROSS MULTI ESTAÇÃO",
-    "25":"DUO HELIÓPOLIS - POLIA EXTERNA CROSS MULTI ESTAÇÃO",
-    "26":"DUO HELIÓPOLIS - REMADA BAIXA CROSS MULTI ESTAÇÃO",
-    "27":"DUO HELIÓPOLIS - PUXADA ALTA CROSS MULTI ESTAÇÃO",
-    "28":"DUO HELIÓPOLIS - POLIA EXTERNA CROSS MULTI ESTAÇÃO",
-    "29":"DUO HELIÓPOLIS - REMADA BAIXA CROSS MULTI ESTAÇÃO",
-    "30":"DUO HELIÓPOLIS - AGACHAMENTO HACK",
-    "31":"DUO HELIÓPOLIS - SMITH MACHINE",
-    "34":"DUO HELIÓPOLIS - LEG PRESS 180º",
-    "35":"DUO HELIÓPOLIS - CALF MACHINE",
-    "36":"DUO HELIÓPOLIS - SENTADILHA",
-    "37":"DUO HELIÓPOLIS - REMADA MÁQUINA",
-    "38":"DUO HELIÓPOLIS - CAVALINHO ARTICULADO",
-    "39":"DUO HELIÓPOLIS - HACK INVERTIDO",
-    "40":"DUO HELIÓPOLIS - BELT SQUAT",
-    "41":"DUO HELIÓPOLIS - DESENVOLVIMENTO ARTICULADO",
-    "42":"DUO HELIÓPOLIS - DESENVOLVIMENTO ARTICULADO",
-    "43":"DUO HELIÓPOLIS - SCOTT ARTICULADO",
-    "44":"DUO HELIÓPOLIS - ROSCA DIRETA MÁQUINA",
-    "45":"DUO HELIÓPOLIS - SUPINO HORIZONTAL ARTICULADO",
-    "46":"DUO HELIÓPOLIS - PUXADOR REMADOR",
-    "47":"DUO HELIÓPOLIS - PUXADOR/REMADOR",
-    "48":"DUO HELIÓPOLIS - PUXADA ALTA ARTICULADA",
-    "49":"DUO HELIÓPOLIS - PUXADA ALTA ARTICULADA",
-    "50":"DUO HELIÓPOLIS - REMADA ARTICULADA",
-    "51":"DUO HELIÓPOLIS - BANCO SCOTT",
-    "52":"DUO HELIÓPOLIS - REMADA BAIXA ARTICULADA",
-    "53":"DUO HELIÓPOLIS - AFUNDO ARTICULADO",
-    "54":"DUO HELIÓPOLIS - SUPINO INCLINADO ARTICULADO",
-    "55":"DUO HELIÓPOLIS - SUPINO VERTICAL ARTICULADO",
-    "56":"DUO HELIÓPOLIS - PARALELA ARTICULADA",
-    "57":"DUO HELIÓPOLIS - GRAVITON",
-    "58":"DUO HELIÓPOLIS - VOADOR",
-    "59":"DUO HELIÓPOLIS - SUPINO DECLINADO",
-    "60":"DUO HELIÓPOLIS - VOADOR",
-    "61":"DUO HELIÓPOLIS - ELÍPTICO",
-    "62":"DUO HELIÓPOLIS - ELÍPTICO",
-    "63":"DUO HELIÓPOLIS - CADEIRA ABDUTORA",
-    "64":"DUO HELIÓPOLIS - CADEIRA ADUTORA",
-    "65":"DUO HELIÓPOLIS - SUPINO INCLINADO",
-    "66":"DUO HELIÓPOLIS - BICICLETA SPINNING",
-    "67":"DUO HELIÓPOLIS - BICICLETA SPINNING",
-    "68":"DUO HELIÓPOLIS - BICICLETA VERTICAL",
-    "69":"DUO HELIÓPOLIS - SIMULADOR DE ESCADA",
-    "70":"DUO HELIÓPOLIS - SIMULADOR DE ESCADA",
-    "71":"DUO HELIÓPOLIS - BICICLETA VERTICAL",
-    "72":"DUO HELIÓPOLIS - BICICLETA HORIZONTAL",
-    "73":"DUO HELIÓPOLIS - SUPINO HORIZONTAL",
-    "74":"DUO HELIÓPOLIS - SUPINO HORIZONTAL",
-    "75":"DUO HELIÓPOLIS - ESTEIRA",
-    "76":"DUO HELIÓPOLIS - ESTEIRA",
-    "77":"DUO HELIÓPOLIS - ESTEIRA",
-    "78":"DUO HELIÓPOLIS - ESTEIRA",
-    "79":"DUO HELIÓPOLIS - ESTEIRA",
-    "80":"DUO HELIÓPOLIS - ESTEIRA",
-    "81":"DUO HELIÓPOLIS - ESTEIRA",
-    "82":"DUO HELIÓPOLIS - ESTEIRA",
-    "83":"DUO HELIÓPOLIS - ESTEIRA",
-    "84":"DUO HELIÓPOLIS - ESTEIRA",
-    "85":"DUO HELIÓPOLIS - ESTEIRA",
-    "86":"DUO HELIÓPOLIS - ESTEIRA",
-    "87":"DUO HELIÓPOLIS - ESTEIRA",
-    "88":"DUO HELIÓPOLIS - ESTEIRA",
-    "89":"DUO HELIÓPOLIS - ESTEIRA",
-    "90":"DUO HELIÓPOLIS - ESTEIRA",
-    "91":"DUO HELIÓPOLIS - BANCO HORIZONTAL",
-    "92":"DUO HELIÓPOLIS - SIMULADOR DE REMO",
-    "93":"DUO HELIÓPOLIS - AIR BIKE",
-    "94":"DUO HELIÓPOLIS - BANCO ROMANO",
-    "95":"DUO HELIÓPOLIS - CADEIRA ADUTORA",
-    "96":"DUO HELIÓPOLIS - CADEIRA ABDUTORA",
-    "97":"DUO HELIÓPOLIS - BICICLETA HORIZONTAL",
-    "98":"DUO HELIÓPOLIS - BICICLETA VERTICAL",
-    "99":"DUO HELIÓPOLIS - ESTEIRA CURVA",
-    "100":"DUO HELIÓPOLIS - SUPORTE PARA ELEVAÇÃO PÉLVICA",
-    "12.A":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA A)",
-    "12.B":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA B)",
-    "13.A":"DUO HELIÓPOLIS - CROSS OVER ANGULAR (POLIA A)",
-    "13.B":"DUO HELIÓPOLIS - CROSS OVER ANGULAR (POLIA B)",
-    "22.A":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA A)",
-    "22.B":"DUO HELIÓPOLIS - CROSS OVER HORIZONTAL (POLIA B)",
-    "32.A":"DUO HELIÓPOLIS - CROSS OVER MULTI ESTAÇÃO (POLIA A)",
-    "32.B":"DUO HELIÓPOLIS - CROSS OVER MULTI ESTAÇÃO (POLIA B)",
-
-    // DUO CENTRO
-    "centro-1":"DUO CENTRO - CADEIRA ADUTORA",
-    "centro-2":"DUO CENTRO - CADEIRA ABDUTORA",
-    "centro-3":"DUO CENTRO - MESA FLEXORA",
-    "centro-4":"DUO CENTRO - CADEIRA EXTENSORA",
-    "centro-5":"DUO CENTRO - CADEIRA EXTENSORA",
-    "centro-6":"DUO CENTRO - CADEIRA EXTENSORA",
-    "centro-7":"DUO CENTRO - CADEIRA FLEXORA",
-    "centro-8":"DUO CENTRO - VOADOR",
-    "centro-9":"DUO CENTRO - VOADOR",
-    "centro-10":"DUO CENTRO - PUXADOR/REMADOR",
-    "centro-11":"DUO CENTRO - PUXADOR/REMADOR",
-    "centro-12":"DUO CENTRO - PUXADOR/REMADOR",
-    "centro-13":"DUO CENTRO - BICICLETA SPINNING",
-    "centro-14":"DUO CENTRO - BICICLETA SPINNING",
-    "centro-15":"DUO CENTRO - BICICLETA HORIZONTAL",
-    "centro-16":"DUO CENTRO - ESTEIRA",
-    "centro-17":"DUO CENTRO - ESTEIRA",
-    "centro-18":"DUO CENTRO - ESTEIRA",
-    "centro-19":"DUO CENTRO - ESTEIRA",
-    "centro-20":"DUO CENTRO - ESTEIRA",
-    "centro-21":"DUO CENTRO - ESTEIRA",
-    "centro-22":"DUO CENTRO - ESTEIRA",
-    "centro-23":"DUO CENTRO - ESTEIRA",
-    "centro-24":"DUO CENTRO - ESTEIRA",
-    "centro-25":"DUO CENTRO - ESTEIRA",
-    "centro-26":"DUO CENTRO - ESCADA",
-    "centro-27":"DUO CENTRO - ELÍPTICO",
-    "centro-28":"DUO CENTRO - ELÍPTICO",
-    "centro-29":"DUO CENTRO - FLEXORA VERTICAL ARTICULADA",
-    "centro-30":"DUO CENTRO - AGACHAMENTO LIVRE",
-    "centro-31":"DUO CENTRO - AGACHAMENTO LIVRE",
-    "centro-32":"DUO CENTRO - SMITH MACHINE",
-    "centro-33":"DUO CENTRO - AFUNDO ARTICULADO",
-    "centro-34":"DUO CENTRO - ELEVAÇÃO PÉLVICA ARTICULADA",
-    "centro-35":"DUO CENTRO - HACK INVERTIDO",
-    "centro-36":"DUO CENTRO - SENTADILHA",
-    "centro-37":"DUO CENTRO - LEG PRESS 180°",
-    "centro-38":"DUO CENTRO - LEG PRESS 45°",
-    "centro-39":"DUO CENTRO - LEG PRESS 45°",
-    "centro-40":"DUO CENTRO - REMADA BAIXA CROSS MULTI ESTAÇÃO",
-    "centro-41":"DUO CENTRO - POLIA EXTERNA CROSS MULTI ESTAÇÃO",
-    "centro-42":"DUO CENTRO - PUXADA ALTA CROSS MULTI ESTAÇÃO",
-    "centro-43.A":"DUO CENTRO - CROSS OVER MULTI ESTAÇÃO (POLIA A)",
-    "centro-43.B":"DUO CENTRO - CROSS OVER MULTI ESTAÇÃO (POLIA B)",
-    "centro-44":"DUO CENTRO - BANCO SCOTT",
-    "centro-45.A":"DUO CENTRO - CROSS OVER ANGULAR (POLIA A)",
-    "centro-45.B":"DUO CENTRO - CROSS OVER ANGULAR (POLIA B)",
-    "centro-46":"DUO CENTRO - REMADA BAIXA CROSS MULTI ESTAÇÃO",
-    "centro-47":"DUO CENTRO - PUXADA ALTA CROSS MULTI ESTAÇÃO",
-    "centro-48":"DUO CENTRO - POLIA EXTERNA CROSS MULTI ESTAÇÃO",
-    "centro-49":"DUO CENTRO - SUPINO INCLINADO",
-    "centro-50":"DUO CENTRO - SUPINO DECLINADO",
-    "centro-51":"DUO CENTRO - SUPINO HORIZONTAL",
-    "centro-52.A":"DUO CENTRO - CROSS OVER ANGULAR (POLIA A)",
-    "centro-52.B":"DUO CENTRO - CROSS OVER ANGULAR (POLIA B)",
-    "centro-53":"DUO CENTRO - SUPINO VERTICAL ARTICULADO",
-    "centro-54":"DUO CENTRO - PUXADA ALTA COM ELEVAÇÃO",
-    "centro-55":"DUO CENTRO - DESENVOLVIMENTO ARTICULADO",
-    "centro-56":"DUO CENTRO - REMADA BAIXA ARTICULADA",
-    "centro-57":"DUO CENTRO - PUXADA HAMMER",
-    "centro-58":"DUO CENTRO - CAVALINHO ARTICULADO",
-    "centro-59":"DUO CENTRO - REMADA ARTICULADA",
-    "centro-60":"DUO CENTRO - AIR BIKE",
-    "centro-61":"DUO CENTRO - CALF MACHINE",
-    "centro-62":"DUO CENTRO - AGACHAMENTO HACK",
-    "centro-64":"DUO CENTRO - AGACHAMENTO HACK",
-    "centro-65":"DUO CENTRO - CADEIRA ADUTORA",
-    "centro-66":"DUO CENTRO - CADEIRA ABDUTORA",
-    "centro-67":"DUO CENTRO - SUPINO INCLINADO ARTICULADO",
-    "centro-68":"DUO CENTRO - SUPINO HORIZONTAL ARTICULADO",
-    "centro-69":"DUO CENTRO - ESTEIRA CURVA",
-    "centro-70":"DUO CENTRO - SIMULADOR DE REMO",
-    "centro-71":"DUO CENTRO - BICICLETA VERTICAL",
-    "centro-72":"DUO CENTRO - BICICLETA HORIZONTAL",
-    "centro-73":"DUO CENTRO - LEG PRESS 180 BIARTICULADO"
-  };
+  let nomeMaquina = "Carregando máquina...";
 
   const tipoProblemaMap = {
     "barulho_anormal":"Barulho anormal",
@@ -589,9 +407,6 @@
     "sem_estofado":"Sem estofado",
     "outro":"Outro"
   };
-
-  const nomeMaquina = maquinas[maquinaId] || "Máquina não encontrada";
-  document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
 
   const tipoProblemaEl = document.getElementById("tipoProblema");
   const outroProblemaEl = document.getElementById("outroProblema");
@@ -633,6 +448,29 @@
     formularioEl.style.display = "none";
     mostrarMensagem("success", "Ok. Nenhum novo problema foi registrado.");
   }
+
+  async function carregarNomeMaquina(){
+  if(!maquinaId){
+    document.getElementById("maquina").innerText = "Máquina não encontrada";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("maquinarios")
+    .select("nome, unidade")
+    .eq("maquina_id", maquinaId)
+    .single();
+
+  if(error || !data){
+    console.log("Erro ao buscar maquinário:", error);
+    nomeMaquina = "Máquina não encontrada";
+    document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
+    return;
+  }
+
+  nomeMaquina = `${data.unidade} - ${data.nome}`;
+  document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
+}
 
   async function verificarProblemasEmAberto(){
     if(!maquinaId){
@@ -760,7 +598,12 @@
     }
   }
 
-  verificarProblemasEmAberto();
+  async function iniciarPagina(){
+    await carregarNomeMaquina();
+    await verificarProblemasEmAberto();
+  }
+
+  iniciarPagina();
 </script>
 
 </body>
