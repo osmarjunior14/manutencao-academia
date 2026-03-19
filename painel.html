@@ -26,22 +26,12 @@
       --red-2:#ef4444;
       --dark:#0f172a;
       --dark-2:#1e293b;
+      --amber:#d97706;
+      --amber-2:#f59e0b;
     }
 
     *{
       box-sizing:border-box;
-    }
-
-    .btn-warning.botao{
-      background:linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-      color:#fff;
-      box-shadow:0 10px 20px rgba(245,158,11,0.18);
-    }
-
-    .btn-warning.botao:hover{
-      transform:translateY(-1px);
-      filter:brightness(1.02);
-      color:#fff;
     }
 
     body{
@@ -193,14 +183,21 @@
       box-shadow:0 0 0 0.22rem rgba(59,130,246,0.14);
     }
 
+    .grid-dashboards{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-bottom:24px;
+    }
+
     .card-dashboard{
       background:rgba(255,255,255,0.92);
       backdrop-filter:blur(12px);
       border-radius:20px;
       padding:22px;
       box-shadow:var(--shadow);
-      margin-bottom:24px;
       border:1px solid rgba(255,255,255,0.7);
+      min-height:180px;
     }
 
     .card-dashboard h5{
@@ -224,6 +221,7 @@
     .ranking-label{
       font-weight:700;
       color:var(--dark);
+      line-height:1.35;
     }
 
     .ranking-badge{
@@ -235,6 +233,11 @@
       font-weight:900;
       white-space:nowrap;
       box-shadow:0 8px 18px rgba(37,99,235,0.22);
+    }
+
+    .ranking-badge.alerta{
+      background:linear-gradient(135deg, var(--amber) 0%, var(--amber-2) 100%);
+      box-shadow:0 8px 18px rgba(245,158,11,0.22);
     }
 
     .card.mb-3.shadow{
@@ -260,15 +263,23 @@
       border-left:7px solid var(--green);
     }
 
+    .card-critica{
+      box-shadow:0 0 0 2px rgba(245,158,11,0.30), var(--shadow) !important;
+    }
+
     .card-body{
       padding:22px;
     }
 
-    .card-body h5{
+    .titulo-maquina{
       font-size:clamp(20px, 2.5vw, 28px);
       line-height:1.1;
       letter-spacing:-0.5px;
       margin-bottom:10px;
+      cursor:pointer;
+      text-decoration:underline;
+      text-decoration-thickness:1px;
+      text-underline-offset:4px;
     }
 
     .card-body p{
@@ -298,6 +309,20 @@
       box-shadow:0 4px 10px rgba(0,0,0,0.08);
     }
 
+    .badge-critico{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      margin-bottom:10px;
+      background:rgba(245,158,11,0.14);
+      color:#b45309;
+      border:1px solid rgba(245,158,11,0.24);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:900;
+    }
+
     .botao{
       width:100%;
       margin-top:10px;
@@ -316,6 +341,18 @@
     .btn-success.botao:hover{
       transform:translateY(-1px);
       filter:brightness(1.02);
+    }
+
+    .btn-warning.botao{
+      background:linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+      color:#fff;
+      box-shadow:0 10px 20px rgba(245,158,11,0.18);
+    }
+
+    .btn-warning.botao:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.02);
+      color:#fff;
     }
 
     .btn-danger.botao{
@@ -339,10 +376,45 @@
       box-shadow:0 4px 12px rgba(0,0,0,0.03);
     }
 
+    .modal-shell{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,0.55);
+      z-index:9999;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .modal-card{
+      width:100%;
+      background:#ffffff;
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.25);
+    }
+
+    .modal-card.pequeno{
+      max-width:420px;
+    }
+
+    .modal-card.grande{
+      max-width:700px;
+      max-height:85vh;
+      overflow:auto;
+    }
+
     hr{
       margin:30px 0;
       border:none;
       border-top:1px solid #dbe4f0;
+    }
+
+    @media (max-width: 900px){
+      .grid-dashboards{
+        grid-template-columns:1fr;
+      }
     }
 
     @media (max-width: 768px){
@@ -388,7 +460,7 @@
   <div class="linha-filtros">
     <input
       class="form-control"
-      placeholder="Filtrar máquina..."
+      placeholder="Filtrar máquina, tipo ou descrição..."
       id="filtro"
     >
 
@@ -399,9 +471,16 @@
     </select>
   </div>
 
-  <div class="card-dashboard">
-    <h5 class="mb-3">📊 Tipos de problema mais frequentes</h5>
-    <div id="rankingProblemas"></div>
+  <div class="grid-dashboards">
+    <div class="card-dashboard">
+      <h5 class="mb-3">📊 Tipos de problema mais frequentes</h5>
+      <div id="rankingProblemas"></div>
+    </div>
+
+    <div class="card-dashboard">
+      <h5 class="mb-3">📈 Máquinas com mais ocorrências</h5>
+      <div id="rankingMaquinas"></div>
+    </div>
   </div>
 
   <h5>🔴 Manutenções em aberto</h5>
@@ -414,24 +493,8 @@
 
 </div>
 
-<div id="modalEdicao" style="
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(15,23,42,0.55);
-  z-index:9999;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-">
-  <div style="
-    width:100%;
-    max-width:420px;
-    background:#ffffff;
-    border-radius:20px;
-    padding:20px;
-    box-shadow:0 20px 50px rgba(0,0,0,0.25);
-  ">
+<div id="modalEdicao" class="modal-shell">
+  <div class="modal-card pequeno">
     <h4 style="margin-bottom:8px; color:#0f172a; font-weight:800;">Editar registro</h4>
     <p style="margin-bottom:14px; color:#64748b; font-size:14px;">
       Selecione o novo tipo de problema.
@@ -464,6 +527,19 @@
   </div>
 </div>
 
+<div id="modalHistorico" class="modal-shell">
+  <div class="modal-card grande">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px;">
+      <h4 id="tituloHistorico" style="margin:0; color:#0f172a; font-weight:800;">Histórico da máquina</h4>
+      <button class="btn btn-secondary" style="border-radius:12px; font-weight:700;" onclick="fecharModalHistorico()">
+        Fechar
+      </button>
+    </div>
+
+    <div id="conteudoHistorico"></div>
+  </div>
+</div>
+
 <script>
   const senhaAdmin = "7c9446a1";
   const senhaResolver = "oud4123";
@@ -492,25 +568,7 @@
     "outro":"Outro"
   };
 
-  const opcoesEdicao = {
-    "barulho_anormal":"Barulho anormal",
-    "cabo_rompido":"Cabo rompido",
-    "choque_eletrico":"Choque elétrico",
-    "corrente_ou_correia_com_defeito":"Corrente/correia com defeito",
-    "equipamento_travando":"Equipamento travando",
-    "estrutura_solta":"Estrutura solta",
-    "estofado_rasgado":"Estofado rasgado",
-    "lubrificacao_necessaria":"Lubrificação necessária",
-    "painel_ou_display_com_defeito":"Painel/display com defeito",
-    "parafuso_frouxo":"Parafuso frouxo",
-    "pino_de_ajuste_quebrado":"Pino de ajuste quebrado",
-    "polia_com_defeito":"Polia com defeito",
-    "regulagem_com_defeito":"Regulagem com defeito",
-    "sem_adesivo_de_pesos":"Sem adesivo de pesos",
-    "sem_carga_ou_resistencia":"Sem carga ou resistência",
-    "sem_estofado":"Sem estofado",
-    "outro":"Outro"
-  };
+  const opcoesEdicao = { ...tiposProblema };
 
   let manutencoes = [];
   let unidadeSelecionada = "todas";
@@ -559,56 +617,43 @@
 
   function obterNomeMaquina(id){
     if(catalogoMaquinas[id]) return catalogoMaquinas[id];
-
-    if(String(id).includes("centro-")){
-      return "DUO CENTRO - Máquina";
-    }
-
+    if(String(id).includes("centro-")) return "DUO CENTRO - Máquina";
     return "DUO HELIÓPOLIS - Máquina";
   }
 
   function obterUnidadeMaquina(id){
     if(unidadePorMaquina[id]) return unidadePorMaquina[id];
-
-    if(String(id).includes("centro-")){
-      return "DUO CENTRO";
-    }
-
+    if(String(id).includes("centro-")) return "DUO CENTRO";
     return "DUO HELIÓPOLIS";
   }
 
   function obterDadosFiltrados(){
-  const filtroTexto = document.getElementById("filtro").value.toLowerCase().trim();
-  unidadeSelecionada = document.getElementById("filtroUnidade").value;
+    const filtroTexto = document.getElementById("filtro").value.toLowerCase().trim();
+    unidadeSelecionada = document.getElementById("filtroUnidade").value;
 
-  return manutencoes.filter(item => {
-    const id = String(item.maquina_id || "");
-    const nome = obterNomeMaquina(id);
-    const unidade = obterUnidadeMaquina(id);
-    const maquinaCompleta = `${nome} - ${id}`.toLowerCase();
-    const tipoFormatado = formatarTipoProblema(item.tipo_problema).toLowerCase();
-    const descricao = (item.descricao || "").toLowerCase();
+    return manutencoes.filter(item => {
+      const id = String(item.maquina_id || "");
+      const nome = obterNomeMaquina(id);
+      const unidade = obterUnidadeMaquina(id);
+      const maquinaCompleta = `${nome} - ${id}`.toLowerCase();
+      const tipoFormatado = formatarTipoProblema(item.tipo_problema).toLowerCase();
+      const descricao = (item.descricao || "").toLowerCase();
 
-    if(unidadeSelecionada === "centro" && unidade !== "DUO CENTRO"){
-      return false;
-    }
+      if(unidadeSelecionada === "centro" && unidade !== "DUO CENTRO") return false;
+      if(unidadeSelecionada === "heliopolis" && unidade !== "DUO HELIÓPOLIS") return false;
 
-    if(unidadeSelecionada === "heliopolis" && unidade !== "DUO HELIÓPOLIS"){
-      return false;
-    }
+      if(
+        filtroTexto &&
+        !maquinaCompleta.includes(filtroTexto) &&
+        !tipoFormatado.includes(filtroTexto) &&
+        !descricao.includes(filtroTexto)
+      ){
+        return false;
+      }
 
-    if(
-      filtroTexto &&
-      !maquinaCompleta.includes(filtroTexto) &&
-      !tipoFormatado.includes(filtroTexto) &&
-      !descricao.includes(filtroTexto)
-    ){
-      return false;
-    }
-
-    return true;
-  });
-}
+      return true;
+    });
+  }
 
   function calcularMetricas(dadosFiltrados){
     const total = dadosFiltrados.length;
@@ -669,8 +714,7 @@
       ranking[chave] = (ranking[chave] || 0) + 1;
     });
 
-    const ordenado = Object.entries(ranking)
-      .sort((a, b) => b[1] - a[1]);
+    const ordenado = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
 
     if(ordenado.length === 0){
       container.innerHTML = `<div class="vazio">Nenhum problema registrado ainda.</div>`;
@@ -684,40 +728,69 @@
       </div>
     `).join("");
   }
+
+  function renderRankingMaquinas(dadosFiltrados){
+    const ranking = {};
+    const container = document.getElementById("rankingMaquinas");
+
+    dadosFiltrados.forEach(item => {
+      const id = item.maquina_id;
+      ranking[id] = (ranking[id] || 0) + 1;
+    });
+
+    const ordenado = Object.entries(ranking)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    if(ordenado.length === 0){
+      container.innerHTML = `<div class="vazio">Nenhum dado ainda.</div>`;
+      return;
+    }
+
+    container.innerHTML = ordenado.map(([id, quantidade]) => {
+      const nome = obterNomeMaquina(id);
+      const badgeClass = quantidade >= 5 ? "ranking-badge alerta" : "ranking-badge";
+      return `
+        <div class="ranking-item">
+          <div class="ranking-label">${nome} - ${id}</div>
+          <div class="${badgeClass}">${quantidade}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
   function formatarDataBonita(dataIso){
-  const data = new Date(dataIso);
-  const agora = new Date();
+    const data = new Date(dataIso);
+    const agora = new Date();
 
-  const mesmaData =
-    data.getDate() === agora.getDate() &&
-    data.getMonth() === agora.getMonth() &&
-    data.getFullYear() === agora.getFullYear();
+    const mesmaData =
+      data.getDate() === agora.getDate() &&
+      data.getMonth() === agora.getMonth() &&
+      data.getFullYear() === agora.getFullYear();
 
-  const ontem = new Date();
-  ontem.setDate(agora.getDate() - 1);
+    const ontem = new Date();
+    ontem.setDate(agora.getDate() - 1);
 
-  const ehOntem =
-    data.getDate() === ontem.getDate() &&
-    data.getMonth() === ontem.getMonth() &&
-    data.getFullYear() === ontem.getFullYear();
+    const ehOntem =
+      data.getDate() === ontem.getDate() &&
+      data.getMonth() === ontem.getMonth() &&
+      data.getFullYear() === ontem.getFullYear();
 
-  if(mesmaData){
-    return `Hoje às ${data.toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })}`;
+    if(mesmaData){
+      return `Hoje às ${data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+
+    if(ehOntem){
+      return `Ontem às ${data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+
+    return data.toLocaleString("pt-BR");
   }
 
-  if(ehOntem){
-    return `Ontem às ${data.toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })}`;
+  function contarOcorrenciasMaquina(maquinaId){
+    return manutencoes.filter(item => String(item.maquina_id) === String(maquinaId)).length;
   }
 
-  return data.toLocaleString("pt-BR");
-}
-  
   function render(){
     const dadosFiltrados = obterDadosFiltrados();
 
@@ -765,10 +838,18 @@
         ? `<p class="mb-2 mt-2">${item.descricao}</p>`
         : "";
 
+      const ocorrencias = contarOcorrenciasMaquina(item.maquina_id);
+      const criticaHtml = ocorrencias >= 5
+        ? `<div class="badge-critico">⚠️ Máquina crítica • ${ocorrencias} ocorrências</div>`
+        : "";
+
+      const classeExtra = ocorrencias >= 5 ? "card-critica" : "";
+
       const card = `
-        <div class="card mb-3 shadow ${estaAberto ? "card-maquina" : "card-resolvido"}">
+        <div class="card mb-3 shadow ${estaAberto ? "card-maquina" : "card-resolvido"} ${classeExtra}">
           <div class="card-body">
-            <h5>${maquina}</h5>
+            ${criticaHtml}
+            <h5 class="titulo-maquina" onclick="abrirHistoricoMaquina('${item.maquina_id}')">${maquina}</h5>
             ${tipoProblemaHtml}
             ${descricaoHtml}
             <small>${formatarDataBonita(item.data)}</small>
@@ -800,6 +881,7 @@
 
     calcularMetricas(dadosFiltrados);
     renderRankingProblemas(dadosFiltrados);
+    renderRankingMaquinas(dadosFiltrados);
   }
 
   async function resolver(id){
@@ -815,14 +897,13 @@
 
     const dataResolucao = new Date().toISOString();
 
-    const { data: dadosAtualizados, error } = await supabaseClient
+    const { error } = await supabaseClient
       .from("manutencao_academia")
       .update({
         status: "resolvido",
         data_resolucao: dataResolucao
       })
-      .eq("id", id)
-      .select();
+      .eq("id", id);
 
     if(error){
       alert("Erro ao resolver manutenção: " + error.message);
@@ -830,15 +911,6 @@
       return;
     }
 
-    console.log("Registro atualizado:", dadosAtualizados);
-
-    manutencoes = manutencoes.map(item =>
-      item.id === id
-        ? { ...item, status: "resolvido", data_resolucao: dataResolucao }
-        : item
-    );
-
-    render();
     alert("Manutenção resolvida com sucesso");
     carregar();
   }
@@ -965,6 +1037,72 @@
     alert("Registro editado com sucesso");
     fecharModalEdicao();
     carregar();
+  }
+
+  function fecharModalHistorico(){
+    document.getElementById("modalHistorico").style.display = "none";
+    document.getElementById("tituloHistorico").textContent = "Histórico da máquina";
+    document.getElementById("conteudoHistorico").innerHTML = "";
+  }
+
+  function abrirHistoricoMaquina(maquinaId){
+    const nomeMaquina = obterNomeMaquina(maquinaId);
+    const titulo = `${nomeMaquina} - ${maquinaId}`;
+    const conteudo = document.getElementById("conteudoHistorico");
+    const tituloEl = document.getElementById("tituloHistorico");
+
+    const registros = manutencoes
+      .filter(item => String(item.maquina_id) === String(maquinaId))
+      .sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    tituloEl.textContent = titulo;
+
+    if(registros.length === 0){
+      conteudo.innerHTML = `<div class="vazio">Nenhum histórico encontrado para esta máquina.</div>`;
+      document.getElementById("modalHistorico").style.display = "flex";
+      return;
+    }
+
+    conteudo.innerHTML = registros.map(item => {
+      const statusNormalizado = String(item.status || "").trim().toLowerCase();
+      const statusHtml = statusNormalizado === "resolvido"
+        ? `<span class="badge bg-success">RESOLVIDO</span>`
+        : `<span class="badge bg-danger">ABERTO</span>`;
+
+      const descricaoHtml = item.descricao
+        ? `<div style="margin-top:6px; color:#334155;"><strong>Descrição:</strong> ${item.descricao}</div>`
+        : "";
+
+      const resolucaoHtml = item.data_resolucao
+        ? `<div style="margin-top:6px; color:#334155;"><strong>Resolvido em:</strong> ${formatarDataBonita(item.data_resolucao)}</div>`
+        : "";
+
+      return `
+        <div style="
+          border:1px solid #e2e8f0;
+          border-radius:16px;
+          padding:14px;
+          margin-bottom:12px;
+          background:#f8fafc;
+        ">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
+            <div style="font-weight:800; color:#0f172a;">
+              ${formatarTipoProblema(item.tipo_problema)}
+            </div>
+            <div>${statusHtml}</div>
+          </div>
+
+          <div style="color:#64748b; font-size:14px;">
+            <strong>Registrado em:</strong> ${formatarDataBonita(item.data)}
+          </div>
+
+          ${descricaoHtml}
+          ${resolucaoHtml}
+        </div>
+      `;
+    }).join("");
+
+    document.getElementById("modalHistorico").style.display = "flex";
   }
 
   document.getElementById("filtro").addEventListener("input", render);
