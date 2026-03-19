@@ -50,6 +50,20 @@
       word-break:break-word;
     }
 
+    .status-maquina{
+      margin-top:6px;
+      font-size:13px;
+      font-weight:bold;
+    }
+
+    .status-maquina.ok{
+      color:#86efac;
+    }
+
+    .status-maquina.alerta{
+      color:#fca5a5;
+    }
+    
     .acoes{
       display:flex;
       gap:8px;
@@ -197,16 +211,38 @@
   }
 
   async function carregar(){
-    const { data, error } = await supabaseClient
-      .from("maquinarios")
-      .select("*")
-      .order("nome");
+    const [maquinariosResp, manutencoesResp] = await Promise.all([
+      supabaseClient
+        .from("maquinarios")
+        .select("*")
+        .order("nome"),
+      supabaseClient
+        .from("manutencao_academia")
+        .select("maquina_id")
+        .eq("status", "aberto")
+    ]);
 
-    if(error){
-      console.log("ERRO SUPABASE:", error);
+    if(maquinariosResp.error){
+      console.log("ERRO SUPABASE maquinarios:", maquinariosResp.error);
       alert("Erro ao carregar maquinários");
       return;
     }
+
+    if(manutencoesResp.error){
+      console.log("ERRO SUPABASE manutencoes:", manutencoesResp.error);
+      alert("Erro ao carregar problemas em aberto");
+      return;
+    }
+
+    const data = maquinariosResp.data || [];
+    const problemas = manutencoesResp.data || [];
+
+    const contagemAbertos = {};
+
+    problemas.forEach(item => {
+      const id = item.maquina_id;
+      contagemAbertos[id] = (contagemAbertos[id] || 0) + 1;
+    });
 
     const helio = document.getElementById("heliopolis");
     const centro = document.getElementById("centro");
@@ -221,11 +257,19 @@
       helio.innerHTML = `<div class="vazio">Nenhum maquinário cadastrado.</div>`;
     } else {
       heliopolis.forEach(m => {
+        const quantidadeAbertos = contagemAbertos[m.maquina_id] || 0;
+        const statusHtml = quantidadeAbertos > 0
+          ? `<div class="status-maquina alerta">🔴 ${quantidadeAbertos} em aberto</div>`
+          : `<div class="status-maquina ok">🟢 OK</div>`;
+
         const div = document.createElement("div");
         div.className = "linha";
 
         div.innerHTML = `
-          <div class="info">${m.maquina_id} - ${m.nome}</div>
+          <div class="info">
+            <div>${m.maquina_id} - ${m.nome}</div>
+            ${statusHtml}
+          </div>
           <div class="acoes">
             <button class="btn-qr" onclick="gerarQR('${m.maquina_id}')">QR</button>
           </div>
@@ -239,11 +283,19 @@
       centro.innerHTML = `<div class="vazio">Nenhum maquinário cadastrado.</div>`;
     } else {
       duoCentro.forEach(m => {
+        const quantidadeAbertos = contagemAbertos[m.maquina_id] || 0;
+        const statusHtml = quantidadeAbertos > 0
+          ? `<div class="status-maquina alerta">🔴 ${quantidadeAbertos} em aberto</div>`
+          : `<div class="status-maquina ok">🟢 OK</div>`;
+
         const div = document.createElement("div");
         div.className = "linha";
 
         div.innerHTML = `
-          <div class="info">${m.maquina_id} - ${m.nome}</div>
+          <div class="info">
+            <div>${m.maquina_id} - ${m.nome}</div>
+            ${statusHtml}
+          </div>
           <div class="acoes">
             <button class="btn-qr" onclick="gerarQR('${m.maquina_id}')">QR</button>
           </div>
