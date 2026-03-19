@@ -178,9 +178,11 @@
     }
 
     .linha-filtros .form-control:focus,
-    .linha-filtros .form-select:focus{
+    .linha-filtros .form-select:focus,
+    .busca-maquina-input:focus{
       border-color:#93c5fd;
       box-shadow:0 0 0 0.22rem rgba(59,130,246,0.14);
+      outline:none;
     }
 
     .grid-dashboards{
@@ -203,6 +205,51 @@
     .card-dashboard h5{
       font-size:20px;
       margin-bottom:14px;
+    }
+
+    .busca-maquina-input{
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid #dbe4f0;
+      background:#fff;
+      margin-bottom:12px;
+      min-height:48px;
+    }
+
+    .lista-maquinas-rapida{
+      max-height:280px;
+      overflow:auto;
+      border-radius:14px;
+      background:rgba(248,250,252,0.8);
+      border:1px solid #e2e8f0;
+    }
+
+    .item-maquina-rapida{
+      padding:12px 14px;
+      border-bottom:1px solid #e2e8f0;
+      cursor:pointer;
+      transition:background .15s ease;
+    }
+
+    .item-maquina-rapida:last-child{
+      border-bottom:none;
+    }
+
+    .item-maquina-rapida:hover{
+      background:#f1f5f9;
+    }
+
+    .item-maquina-rapida strong{
+      display:block;
+      color:#0f172a;
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .item-maquina-rapida small{
+      color:#64748b;
+      font-size:12px;
     }
 
     .ranking-item{
@@ -469,6 +516,18 @@
       <option value="heliopolis">DUO HELIÓPOLIS</option>
       <option value="centro">DUO CENTRO</option>
     </select>
+  </div>
+
+  <div class="card-dashboard" style="margin-bottom:20px;">
+    <h5>🔎 Buscar maquinário</h5>
+
+    <input
+      id="buscaMaquina"
+      class="busca-maquina-input"
+      placeholder="Digite o nome ou ID da máquina..."
+    >
+
+    <div id="listaMaquinasRapida" class="lista-maquinas-rapida"></div>
   </div>
 
   <div class="grid-dashboards">
@@ -791,6 +850,40 @@
     return manutencoes.filter(item => String(item.maquina_id) === String(maquinaId)).length;
   }
 
+  function renderBuscaMaquinas(dadosFiltrados){
+    const container = document.getElementById("listaMaquinasRapida");
+    const busca = document.getElementById("buscaMaquina").value.toLowerCase().trim();
+
+    const mapa = {};
+
+    dadosFiltrados.forEach(item => {
+      const id = item.maquina_id;
+      if(!mapa[id]){
+        mapa[id] = obterNomeMaquina(id);
+      }
+    });
+
+    let lista = Object.entries(mapa).sort((a, b) => a[1].localeCompare(b[1], "pt-BR"));
+
+    if(busca){
+      lista = lista.filter(([id, nome]) =>
+        `${id} ${nome}`.toLowerCase().includes(busca)
+      );
+    }
+
+    if(lista.length === 0){
+      container.innerHTML = `<div class="vazio" style="margin:0;">Nenhuma máquina encontrada.</div>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(([id, nome]) => `
+      <div class="item-maquina-rapida" onclick="abrirHistoricoMaquina('${id}')">
+        <strong>${nome}</strong>
+        <small>ID: ${id}</small>
+      </div>
+    `).join("");
+  }
+
   function render(){
     const dadosFiltrados = obterDadosFiltrados();
 
@@ -882,6 +975,7 @@
     calcularMetricas(dadosFiltrados);
     renderRankingProblemas(dadosFiltrados);
     renderRankingMaquinas(dadosFiltrados);
+    renderBuscaMaquinas(dadosFiltrados);
   }
 
   async function resolver(id){
@@ -1107,6 +1201,7 @@
 
   document.getElementById("filtro").addEventListener("input", render);
   document.getElementById("filtroUnidade").addEventListener("change", render);
+  document.getElementById("buscaMaquina").addEventListener("input", render);
 
   carregar();
 
