@@ -414,6 +414,56 @@
 
 </div>
 
+<div id="modalEdicao" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,0.55);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+">
+  <div style="
+    width:100%;
+    max-width:420px;
+    background:#ffffff;
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  ">
+    <h4 style="margin-bottom:8px; color:#0f172a; font-weight:800;">Editar registro</h4>
+    <p style="margin-bottom:14px; color:#64748b; font-size:14px;">
+      Selecione o novo tipo de problema.
+    </p>
+
+    <select id="selectEdicaoProblema" class="form-select" style="margin-bottom:12px;"></select>
+
+    <div id="boxDescricaoEdicao" style="display:none;">
+      <label for="descricaoEdicao" style="display:block; margin-bottom:8px; font-weight:700; color:#0f172a;">
+        Descrição do problema
+      </label>
+      <textarea
+        id="descricaoEdicao"
+        class="form-control"
+        rows="4"
+        maxlength="200"
+        placeholder="Descreva o problema..."
+        style="margin-bottom:12px;"
+      ></textarea>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-secondary" style="flex:1; border-radius:12px; font-weight:700;" onclick="fecharModalEdicao()">
+        Cancelar
+      </button>
+      <button class="btn btn-warning" style="flex:1; border-radius:12px; font-weight:700; color:#fff;" onclick="salvarEdicaoRegistro()">
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   const senhaAdmin = "7c9446a1";
   const senhaResolver = "oud4123";
@@ -466,6 +516,7 @@
   let unidadeSelecionada = "todas";
   let catalogoMaquinas = {};
   let unidadePorMaquina = {};
+  let registroEditandoId = null;
 
   async function carregar(){
     const [manutencoesResp, maquinariosResp] = await Promise.all([
@@ -793,33 +844,78 @@
       return;
     }
 
-    const listaOpcoes = Object.entries(opcoesEdicao)
-      .map(([valor, texto]) => `${valor} = ${texto}`)
-      .join("\n");
+    registroEditandoId = id;
 
-    const novoTipo = prompt(
-      `Digite o código do novo tipo de problema:\n\n${listaOpcoes}`,
-      registro.tipo_problema || ""
-    );
+    const select = document.getElementById("selectEdicaoProblema");
+    const boxDescricao = document.getElementById("boxDescricaoEdicao");
+    const descricao = document.getElementById("descricaoEdicao");
 
-    if(!novoTipo) return;
+    select.innerHTML = `<option value="">Selecione o problema</option>`;
 
-    if(!opcoesEdicao[novoTipo]){
-      alert("Tipo inválido.");
+    Object.entries(opcoesEdicao).forEach(([valor, texto]) => {
+      const option = document.createElement("option");
+      option.value = valor;
+      option.textContent = texto;
+      if(registro.tipo_problema === valor){
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+
+    descricao.value = registro.descricao || "";
+
+    if(registro.tipo_problema === "outro"){
+      boxDescricao.style.display = "block";
+    } else {
+      boxDescricao.style.display = "none";
+    }
+
+    select.onchange = function(){
+      if(select.value === "outro"){
+        boxDescricao.style.display = "block";
+      } else {
+        boxDescricao.style.display = "none";
+        descricao.value = "";
+      }
+    };
+
+    document.getElementById("modalEdicao").style.display = "flex";
+  }
+
+  function fecharModalEdicao(){
+    document.getElementById("modalEdicao").style.display = "none";
+    document.getElementById("selectEdicaoProblema").innerHTML = "";
+    document.getElementById("descricaoEdicao").value = "";
+    document.getElementById("boxDescricaoEdicao").style.display = "none";
+    registroEditandoId = null;
+  }
+
+  async function salvarEdicaoRegistro(){
+    if(!registroEditandoId){
+      alert("Nenhum registro selecionado.");
       return;
     }
 
-    const novaDescricao = novoTipo === "outro"
-      ? prompt("Descreva o problema:", registro.descricao || "") || ""
-      : "";
+    const novoTipo = document.getElementById("selectEdicaoProblema").value;
+    const novaDescricao = document.getElementById("descricaoEdicao").value.trim();
+
+    if(!novoTipo){
+      alert("Selecione um tipo de problema.");
+      return;
+    }
+
+    if(novoTipo === "outro" && !novaDescricao){
+      alert("Descreva o problema.");
+      return;
+    }
 
     const { error } = await supabaseClient
       .from("manutencao_academia")
       .update({
         tipo_problema: novoTipo,
-        descricao: novaDescricao
+        descricao: novoTipo === "outro" ? novaDescricao : ""
       })
-      .eq("id", id);
+      .eq("id", registroEditandoId);
 
     if(error){
       alert("Erro ao editar registro: " + error.message);
@@ -828,6 +924,7 @@
     }
 
     alert("Registro editado com sucesso");
+    fecharModalEdicao();
     carregar();
   }
 
