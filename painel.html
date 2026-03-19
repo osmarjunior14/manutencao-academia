@@ -684,7 +684,40 @@
       </div>
     `).join("");
   }
+  function formatarDataBonita(dataIso){
+  const data = new Date(dataIso);
+  const agora = new Date();
 
+  const mesmaData =
+    data.getDate() === agora.getDate() &&
+    data.getMonth() === agora.getMonth() &&
+    data.getFullYear() === agora.getFullYear();
+
+  const ontem = new Date();
+  ontem.setDate(agora.getDate() - 1);
+
+  const ehOntem =
+    data.getDate() === ontem.getDate() &&
+    data.getMonth() === ontem.getMonth() &&
+    data.getFullYear() === ontem.getFullYear();
+
+  if(mesmaData){
+    return `Hoje às ${data.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    })}`;
+  }
+
+  if(ehOntem){
+    return `Ontem às ${data.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    })}`;
+  }
+
+  return data.toLocaleString("pt-BR");
+}
+  
   function render(){
     const dadosFiltrados = obterDadosFiltrados();
 
@@ -714,7 +747,7 @@
         : "";
 
       const dataResolucaoHtml = item.data_resolucao
-        ? `<div class="mt-2"><small><strong>Resolvido em:</strong> ${new Date(item.data_resolucao).toLocaleString()}</small></div>`
+        ? `<div class="mt-2"><small><strong>Resolvido em:</strong> ${formatarDataBonita(item.data_resolucao)}</small></div>`
         : "";
 
       const botoesHtml = estaAberto
@@ -738,7 +771,7 @@
             <h5>${maquina}</h5>
             ${tipoProblemaHtml}
             ${descricaoHtml}
-            <small>${new Date(item.data).toLocaleString()}</small>
+            <small>${formatarDataBonita(item.data)}</small>
             <div class="status-texto">${statusHtml}</div>
             ${dataResolucaoHtml}
             <div class="mt-2">
