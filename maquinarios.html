@@ -90,7 +90,7 @@
 <div id="centro" class="bloco"></div>
 
 <script>
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   "https://chyomxetiloktyepjbtk.supabase.co",
   "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
 );
@@ -109,7 +109,7 @@ async function salvar(){
     return;
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("maquinarios")
     .insert([{ unidade, maquina_id: id, nome }]);
 
@@ -127,7 +127,7 @@ function gerarQR(id){
 }
 
 async function carregar(){
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("maquinarios")
     .select("*")
     .order("maquina_id");
