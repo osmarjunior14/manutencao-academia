@@ -127,10 +127,18 @@ function gerarQR(id){
 }
 
 async function carregar(){
-  const { data } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("maquinarios")
     .select("*")
-    .order("maquina_id");
+    .order("nome");
+
+  if(error){
+    console.log("ERRO SUPABASE:", error);
+    alert("Erro ao carregar maquinários");
+    return;
+  }
+
+  console.log("DADOS:", data);
 
   const helio = document.getElementById("heliopolis");
   const centro = document.getElementById("centro");
