@@ -3,838 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Maquinários - DUO</title>
+  <title>Registrar Problema</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    :root{
-      --bg-1:#0f172a;
-      --bg-2:#111827;
-      --card:#1e293b;
-      --card-2:#334155;
-      --line:#475569;
-      --text:#ffffff;
-      --muted:#94a3b8;
-      --green:#22c55e;
-      --green-2:#16a34a;
-      --blue:#3b82f6;
-      --blue-2:#2563eb;
-      --red:#ef4444;
-      --red-2:#dc2626;
-      --amber:#f59e0b;
-      --amber-2:#d97706;
-      --shadow:0 12px 28px rgba(0,0,0,0.24);
-    }
-
-    *{
-      box-sizing:border-box;
-    }
-
     body{
-      margin:0;
+      font-family: Arial;
+      background:#f5f7fb;
       padding:20px;
-      font-family:Inter, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(59,130,246,0.16) 0%, transparent 25%),
-        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
-      color:var(--text);
+      text-align:center;
     }
 
-    .container{
-      max-width:1200px;
-      margin:0 auto;
-    }
-
-    h1{
-      margin:0 0 8px;
-      font-size:clamp(30px, 4vw, 42px);
-      font-weight:900;
-      letter-spacing:-1px;
-    }
-
-    .subtitulo{
-      margin:0 0 22px;
-      color:var(--muted);
-      font-size:15px;
-    }
-
-    .topo-acoes{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-bottom:14px;
-    }
-
-    .linha-busca{
-      margin-bottom:18px;
-    }
-
-    .campo-busca{
-      width:100%;
-      border:none;
-      outline:none;
-      border-radius:14px;
-      padding:14px 16px;
-      background:#f8fafc;
-      color:#0f172a;
-      font-size:15px;
-      box-shadow:var(--shadow);
-    }
-
-    .painel-form{
-      display:none;
-      margin-bottom:20px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:18px;
-      padding:16px;
-      backdrop-filter:blur(10px);
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr 1.5fr auto;
-      gap:10px;
-      align-items:end;
-    }
-
-    .campo{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    .campo label{
-      font-size:13px;
-      font-weight:700;
-      color:#cbd5e1;
-    }
-
-    .campo input,
-    .campo select{
-      border:none;
-      outline:none;
-      border-radius:12px;
-      padding:12px 14px;
-      font-size:15px;
-      background:#f8fafc;
-      color:#0f172a;
-      min-height:46px;
-    }
-
-    .btn{
-      border:none;
-      border-radius:12px;
-      padding:12px 16px;
-      font-size:14px;
-      font-weight:800;
-      cursor:pointer;
-      transition:all .16s ease;
-      color:#fff;
-    }
-
-    .btn:hover{
-      transform:translateY(-1px);
-      filter:brightness(1.02);
-    }
-
-    .btn-add{
-      background:linear-gradient(135deg, var(--green) 0%, var(--green-2) 100%);
-      box-shadow:0 10px 20px rgba(34,197,94,0.18);
-    }
-
-    .btn-geral{
-      background:linear-gradient(135deg, var(--blue) 0%, var(--blue-2) 100%);
-      box-shadow:0 10px 20px rgba(59,130,246,0.18);
-    }
-
-    .btn-cancelar{
-      background:linear-gradient(135deg, #64748b 0%, #475569 100%);
-      box-shadow:0 10px 20px rgba(100,116,139,0.18);
-    }
-
-    .secao{
-      margin-top:24px;
-    }
-
-    .secao h2{
-      margin:0 0 12px;
-      font-size:22px;
-      font-weight:900;
-    }
-
-    .bloco{
-      background:rgba(30,41,59,0.94);
-      border:1px solid rgba(255,255,255,0.08);
-      padding:20px;
-      border-radius:18px;
-      box-shadow:var(--shadow);
-    }
-
-    .linha{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:14px;
-      padding:14px 0;
-      border-bottom:1px solid var(--line);
-    }
-
-    .linha:last-child{
-      border-bottom:none;
-    }
-
-    .info{
-      flex:1;
-      min-width:0;
-    }
-
-    .titulo-maquina{
-      font-size:16px;
-      font-weight:800;
-      color:#fff;
-      line-height:1.35;
-      word-break:break-word;
-    }
-
-    .subinfo{
-      margin-top:6px;
-      color:#cbd5e1;
-      font-size:14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-
-    .status-maquina{
-      margin-top:8px;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:900;
-    }
-
-    .status-maquina.ok{
-      background:rgba(34,197,94,0.14);
-      color:#86efac;
-      border:1px solid rgba(34,197,94,0.25);
-    }
-
-    .status-maquina.alerta{
-      background:rgba(239,68,68,0.14);
-      color:#fca5a5;
-      border:1px solid rgba(239,68,68,0.24);
-    }
-
-    .acoes{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      flex-shrink:0;
-    }
-
-    .btn-qr{
-      background:linear-gradient(135deg, var(--blue) 0%, var(--blue-2) 100%);
-    }
-
-    .btn-editar{
-      background:linear-gradient(135deg, var(--amber) 0%, var(--amber-2) 100%);
-    }
-
-    .btn-excluir{
-      background:linear-gradient(135deg, var(--red) 0%, var(--red-2) 100%);
-    }
-
-    .vazio{
-      color:var(--muted);
-      font-style:italic;
-      background:rgba(255,255,255,0.04);
-      border:1px dashed rgba(255,255,255,0.14);
-      border-radius:14px;
-      padding:16px;
-    }
-
-    .modal-shell{
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(15,23,42,0.65);
-      z-index:9999;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-    }
-
-    .modal-card{
-      width:100%;
-      max-width:460px;
+    .card{
+      max-width:500px;
+      margin:auto;
       background:#fff;
-      border-radius:20px;
       padding:20px;
-      box-shadow:0 20px 50px rgba(0,0,0,0.28);
-    }
-
-    .modal-card h3{
-      margin:0 0 8px;
-      color:#0f172a;
-      font-weight:900;
-    }
-
-    .modal-card p{
-      margin:0 0 14px;
-      color:#64748b;
-      font-size:14px;
-    }
-
-    .modal-card input,
-    .modal-card select{
-      width:100%;
-      border:none;
-      outline:none;
       border-radius:12px;
-      padding:12px 14px;
-      background:#f8fafc;
-      color:#0f172a;
-      min-height:46px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    h2{
       margin-bottom:10px;
     }
 
-    .modal-acoes{
-      display:flex;
-      gap:10px;
+    select, textarea, button{
+      width:100%;
+      padding:12px;
       margin-top:10px;
+      border-radius:8px;
+      border:1px solid #ddd;
+      font-size:16px;
     }
 
-    .modal-acoes .btn{
-      flex:1;
+    button{
+      background:#2563eb;
+      color:#fff;
+      border:none;
+      font-weight:bold;
+      cursor:pointer;
     }
 
-    @media (max-width: 900px){
-      .form-grid{
-        grid-template-columns:1fr;
-      }
+    button:hover{
+      opacity:0.9;
     }
 
-    @media (max-width: 700px){
-      .linha{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-
-      .acoes{
-        width:100%;
-      }
-
-      .acoes .btn{
-        flex:1;
-      }
+    .ok{
+      color:green;
+      margin-top:10px;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
+<div class="card">
 
-  <h1>📋 Maquinários</h1>
-  <p class="subtitulo">Cadastre, edite, organize e gere QR Codes dos equipamentos das unidades DUO.</p>
+  <h2 id="tituloMaquina">Carregando...</h2>
 
-  <div class="topo-acoes">
-    <button class="btn btn-add" onclick="abrirForm()">+ Adicionar Maquinário</button>
-    <button class="btn btn-geral" onclick="gerarTodosQRCodes()">Gerar todos os QR Codes</button>
-  </div>
+  <p>Selecione o problema encontrado:</p>
 
-  <div class="linha-busca">
-    <input
-      id="busca"
-      class="campo-busca"
-      placeholder="Buscar por ID, nome ou unidade..."
-    >
-  </div>
+  <select id="problema">
+    <option value="">Selecione</option>
+    <option value="barulho_anormal">Barulho anormal</option>
+    <option value="cabo_rompido">Cabo rompido</option>
+    <option value="choque_eletrico">Choque elétrico</option>
+    <option value="corrente_ou_correia_com_defeito">Corrente/correia com defeito</option>
+    <option value="equipamento_travando">Equipamento travando</option>
+    <option value="estrutura_solta">Estrutura solta</option>
+    <option value="estofado_rasgado">Estofado rasgado</option>
+    <option value="lubrificacao_necessaria">Lubrificação necessária</option>
+    <option value="painel_ou_display_com_defeito">Painel/display com defeito</option>
+    <option value="parafuso_frouxo">Parafuso frouxo</option>
+    <option value="pino_de_ajuste_quebrado">Pino de ajuste quebrado</option>
+    <option value="polia_com_defeito">Polia com defeito</option>
+    <option value="regulagem_com_defeito">Regulagem com defeito</option>
+    <option value="sem_adesivo_de_pesos">Sem adesivo de pesos</option>
+    <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
+    <option value="sem_estofado">Sem estofado</option>
+    <option value="outro">Outro</option>
+  </select>
 
-  <div class="painel-form" id="formPainel">
-    <div class="form-grid">
-      <div class="campo">
-        <label for="unidade">Unidade</label>
-        <select id="unidade">
-          <option value="DUO HELIÓPOLIS">DUO HELIÓPOLIS</option>
-          <option value="DUO CENTRO">DUO CENTRO</option>
-        </select>
-      </div>
+  <textarea id="descricao" placeholder="Descreva o problema..." style="display:none;"></textarea>
 
-      <div class="campo">
-        <label for="id">ID</label>
-        <input id="id" placeholder="Ex: 101 ou centro-74">
-      </div>
+  <button onclick="enviar()">Registrar problema</button>
 
-      <div class="campo">
-        <label for="nome">Nome do maquinário</label>
-        <input id="nome" placeholder="Nome da máquina">
-      </div>
+  <p id="msg" class="ok"></p>
 
-      <div class="campo">
-        <label>&nbsp;</label>
-        <button class="btn btn-add" onclick="salvar()">Salvar</button>
-      </div>
-    </div>
-
-    <div style="margin-top:10px;">
-      <button class="btn btn-cancelar" onclick="fecharForm()">Cancelar</button>
-    </div>
-  </div>
-
-  <div class="secao">
-    <h2>🏋️ DUO HELIÓPOLIS</h2>
-    <div id="heliopolis" class="bloco"></div>
-  </div>
-
-  <div class="secao">
-    <h2>🏋️ DUO CENTRO</h2>
-    <div id="centro" class="bloco"></div>
-  </div>
-
-</div>
-
-<div id="modalEdicao" class="modal-shell">
-  <div class="modal-card">
-    <h3>Editar maquinário</h3>
-    <p>Altere os dados abaixo.</p>
-
-    <select id="editUnidade">
-      <option value="DUO HELIÓPOLIS">DUO HELIÓPOLIS</option>
-      <option value="DUO CENTRO">DUO CENTRO</option>
-    </select>
-
-    <input id="editId" placeholder="ID do maquinário">
-    <input id="editNome" placeholder="Nome do maquinário">
-
-    <div class="modal-acoes">
-      <button class="btn btn-cancelar" onclick="fecharModalEdicao()">Cancelar</button>
-      <button class="btn btn-editar" onclick="salvarEdicao()">Salvar</button>
-    </div>
-  </div>
 </div>
 
 <script>
-  const supabaseClient = window.supabase.createClient(
-    "https://chyomxetiloktyepjbtk.supabase.co",
-    "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
-  );
+  const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
+  const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  let maquinarios = [];
-  let manutencoesAbertas = [];
-  let maquinaEditandoPk = null;
+  const params = new URLSearchParams(window.location.search);
+  const maquinaId = params.get("id");
 
-  function abrirForm(){
-    document.getElementById("formPainel").style.display = "block";
-  }
+  document.getElementById("tituloMaquina").innerText = "Máquina ID: " + maquinaId;
 
-  function fecharForm(){
-    document.getElementById("formPainel").style.display = "none";
-    document.getElementById("unidade").value = "DUO HELIÓPOLIS";
-    document.getElementById("id").value = "";
-    document.getElementById("nome").value = "";
-  }
+  document.getElementById("problema").addEventListener("change", function(){
+    if(this.value === "outro"){
+      document.getElementById("descricao").style.display = "block";
+    } else {
+      document.getElementById("descricao").style.display = "none";
+    }
+  });
 
-  async function salvar(){
-    const unidade = document.getElementById("unidade").value;
-    const id = document.getElementById("id").value.trim();
-    const nome = document.getElementById("nome").value.trim();
+  async function enviar(){
+    const tipo = document.getElementById("problema").value;
+    const descricao = document.getElementById("descricao").value;
 
-    if(!id || !nome){
-      alert("Preencha todos os campos.");
+    if(!tipo){
+      alert("Selecione o problema");
       return;
     }
 
-    const { error } = await supabaseClient
-      .from("maquinarios")
-      .insert([{ unidade, maquina_id: id, nome }]);
+    const { error } = await supabase
+      .from("manutencao_academia")
+      .insert([
+        {
+          maquina_id: maquinaId,
+          tipo_problema: tipo,
+          descricao: tipo === "outro" ? descricao : "",
+          status: "aberto",
+          data: new Date().toISOString()
+        }
+      ]);
 
     if(error){
-      console.log("Erro ao salvar:", error);
-      alert("Erro ao salvar maquinário.");
+      alert("Erro ao registrar: " + error.message);
       return;
     }
 
-    fecharForm();
-    carregar();
+    document.getElementById("msg").innerText = "Problema registrado com sucesso!";
   }
-
-  function gerarQR(id){
-    const url = `${location.origin}/manutencao-academia/maquina.html?id=${encodeURIComponent(id)}`;
-    window.open(
-      `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`,
-      "_blank"
-    );
-  }
-
-  function obterContagemAbertos(){
-    const contagem = {};
-    manutencoesAbertas.forEach(item => {
-      const id = item.maquina_id;
-      contagem[id] = (contagem[id] || 0) + 1;
-    });
-    return contagem;
-  }
-
-  function getBusca(){
-    return document.getElementById("busca").value.toLowerCase().trim();
-  }
-
-  function filtrarMaquinarios(lista){
-    const busca = getBusca();
-
-    if(!busca) return lista;
-
-    return lista.filter(m => {
-      const texto = `${m.maquina_id} ${m.nome} ${m.unidade}`.toLowerCase();
-      return texto.includes(busca);
-    });
-  }
-
-  async function carregar(){
-    const [maquinariosResp, manutencoesResp] = await Promise.all([
-      supabaseClient
-        .from("maquinarios")
-        .select("*")
-        .order("nome"),
-      supabaseClient
-        .from("manutencao_academia")
-        .select("maquina_id")
-        .eq("status", "aberto")
-    ]);
-
-    if(maquinariosResp.error){
-      console.log("Erro ao carregar maquinários:", maquinariosResp.error);
-      alert("Erro ao carregar maquinários.");
-      return;
-    }
-
-    if(manutencoesResp.error){
-      console.log("Erro ao carregar problemas em aberto:", manutencoesResp.error);
-      alert("Erro ao carregar problemas em aberto.");
-      return;
-    }
-
-    maquinarios = maquinariosResp.data || [];
-    manutencoesAbertas = manutencoesResp.data || [];
-
-    render();
-  }
-
-  function renderBloco(containerId, lista){
-    const container = document.getElementById(containerId);
-    const contagemAbertos = obterContagemAbertos();
-
-    if(lista.length === 0){
-      container.innerHTML = `<div class="vazio">Nenhum maquinário encontrado.</div>`;
-      return;
-    }
-
-    container.innerHTML = lista.map(m => {
-      const quantidadeAbertos = contagemAbertos[m.maquina_id] || 0;
-      const statusHtml = quantidadeAbertos > 0
-        ? `<div class="status-maquina alerta">🔴 ${quantidadeAbertos} em aberto</div>`
-        : `<div class="status-maquina ok">🟢 OK</div>`;
-
-      return `
-        <div class="linha">
-          <div class="info">
-            <div class="titulo-maquina">${m.maquina_id} - ${m.nome}</div>
-            <div class="subinfo">
-              <span><strong>Unidade:</strong> ${m.unidade}</span>
-            </div>
-            ${statusHtml}
-          </div>
-
-          <div class="acoes">
-            <button class="btn btn-qr" onclick="gerarQR('${m.maquina_id}')">QR</button>
-            <button class="btn btn-editar" onclick="abrirModalEdicao('${m.id}', '${escapeJs(m.unidade)}', '${escapeJs(m.maquina_id)}', '${escapeJs(m.nome)}')">Editar</button>
-            <button class="btn btn-excluir" onclick="excluirMaquinario('${m.id}', '${escapeJs(m.nome)}')">Excluir</button>
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  function render(){
-    const heliopolis = filtrarMaquinarios(maquinarios.filter(m => m.unidade === "DUO HELIÓPOLIS"));
-    const centro = filtrarMaquinarios(maquinarios.filter(m => m.unidade === "DUO CENTRO"));
-
-    renderBloco("heliopolis", heliopolis);
-    renderBloco("centro", centro);
-  }
-
-  function escapeJs(texto){
-    return String(texto)
-      .replace(/\\/g, "\\\\")
-      .replace(/'/g, "\\'")
-      .replace(/"/g, "&quot;");
-  }
-
-  function abrirModalEdicao(id, unidade, maquinaId, nome){
-    maquinaEditandoPk = id;
-    document.getElementById("editUnidade").value = unidade;
-    document.getElementById("editId").value = maquinaId;
-    document.getElementById("editNome").value = nome;
-    document.getElementById("modalEdicao").style.display = "flex";
-  }
-
-  function fecharModalEdicao(){
-    document.getElementById("modalEdicao").style.display = "none";
-    document.getElementById("editUnidade").value = "DUO HELIÓPOLIS";
-    document.getElementById("editId").value = "";
-    document.getElementById("editNome").value = "";
-    maquinaEditandoPk = null;
-  }
-
-  async function salvarEdicao(){
-    if(!maquinaEditandoPk){
-      alert("Nenhum maquinário selecionado.");
-      return;
-    }
-
-    const unidade = document.getElementById("editUnidade").value;
-    const maquina_id = document.getElementById("editId").value.trim();
-    const nome = document.getElementById("editNome").value.trim();
-
-    if(!maquina_id || !nome){
-      alert("Preencha todos os campos.");
-      return;
-    }
-
-    const { error } = await supabaseClient
-      .from("maquinarios")
-      .update({ unidade, maquina_id, nome })
-      .eq("id", maquinaEditandoPk);
-
-    if(error){
-      console.log("Erro ao editar:", error);
-      alert("Erro ao editar maquinário.");
-      return;
-    }
-
-    fecharModalEdicao();
-    carregar();
-  }
-
-  async function excluirMaquinario(id, nome){
-    const confirmar = confirm(`Tem certeza que deseja excluir o maquinário "${nome}"?`);
-    if(!confirmar) return;
-
-    const { error } = await supabaseClient
-      .from("maquinarios")
-      .delete()
-      .eq("id", id);
-
-    if(error){
-      console.log("Erro ao excluir:", error);
-      alert("Erro ao excluir maquinário.");
-      return;
-    }
-
-    carregar();
-  }
-
-  async function gerarTodosQRCodes(){
-    const { data, error } = await supabaseClient
-      .from("maquinarios")
-      .select("*")
-      .order("unidade")
-      .order("nome");
-
-    if(error){
-      alert("Erro ao carregar maquinários para gerar os QR Codes.");
-      console.log(error);
-      return;
-    }
-
-    let html = `
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-      <head>
-        <meta charset="UTF-8">
-        <title>Todos os QR Codes</title>
-        <style>
-          *{
-            box-sizing:border-box;
-          }
-
-          body{
-            margin:0;
-            padding:24px;
-            background:#e9e9e9;
-            font-family:Arial, sans-serif;
-          }
-
-          .topo{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-bottom:24px;
-          }
-
-          .topo h1{
-            margin:0;
-            font-size:28px;
-            color:#111827;
-          }
-
-          .topo button{
-            padding:12px 18px;
-            border:none;
-            border-radius:10px;
-            background:#2563eb;
-            color:#fff;
-            font-size:16px;
-            font-weight:bold;
-            cursor:pointer;
-          }
-
-          .pagina{
-            display:grid;
-            grid-template-columns:repeat(4, 280px);
-            gap:28px 32px;
-            justify-content:center;
-          }
-
-          .etiqueta{
-            width:280px;
-            min-height:405px;
-            background:linear-gradient(180deg, #020817 0%, #010b1f 100%);
-            border-radius:22px;
-            padding:22px 20px 18px;
-            color:#fff;
-            box-shadow:0 10px 24px rgba(0,0,0,0.18);
-            page-break-inside:avoid;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-          }
-
-          .topo-etiqueta{
-            width:100%;
-            background:linear-gradient(90deg, #03143d 0%, #132b63 100%);
-            border-radius:12px;
-            padding:10px 12px;
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            margin-bottom:22px;
-          }
-
-          .id-label{
-            color:#1fb6ff;
-            font-weight:900;
-            font-size:16px;
-            letter-spacing:0.3px;
-          }
-
-          .id-valor{
-            color:#ffffff;
-            font-weight:900;
-            font-size:28px;
-            line-height:1;
-          }
-
-          .qr-box{
-            width:202px;
-            height:202px;
-            background:#ffffff;
-            border-radius:12px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            padding:14px;
-            margin-bottom:26px;
-          }
-
-          .qr-box img{
-            width:100%;
-            height:100%;
-            object-fit:contain;
-          }
-
-          .rodape{
-            margin-top:auto;
-            width:100%;
-            border-top:1px solid rgba(59,130,246,0.22);
-            padding-top:10px;
-            text-align:left;
-            color:#94a3b8;
-            font-size:13px;
-          }
-
-          @media print{
-            body{
-              background:#ffffff;
-              padding:12mm;
-            }
-
-            .topo{
-              display:none;
-            }
-
-            .pagina{
-              grid-template-columns:repeat(2, 280px);
-              gap:18px 24px;
-            }
-
-            .etiqueta{
-              box-shadow:none;
-              break-inside:avoid;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="topo">
-          <h1>Todos os QR Codes</h1>
-          <button onclick="window.print()">Imprimir</button>
-        </div>
-
-        <div class="pagina">
-    `;
-
-    data.forEach(m => {
-      const url = `${location.origin}/manutencao-academia/maquina.html?id=${encodeURIComponent(m.maquina_id)}`;
-      const qr = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`;
-
-      html += `
-        <div class="etiqueta">
-          <div class="topo-etiqueta">
-            <div class="id-label">ID</div>
-            <div class="id-valor">${m.maquina_id}</div>
-          </div>
-
-          <div class="qr-box">
-            <img src="${qr}" alt="QR Code">
-          </div>
-
-          <div class="rodape">Escaneie para reportar problemas</div>
-        </div>
-      `;
-    });
-
-    html += `
-        </div>
-      </body>
-      </html>
-    `;
-
-    const novaJanela = window.open("", "_blank");
-    novaJanela.document.open();
-    novaJanela.document.write(html);
-    novaJanela.document.close();
-  }
-
-  document.getElementById("busca").addEventListener("input", render);
-
-  carregar();
 </script>
 
 </body>
