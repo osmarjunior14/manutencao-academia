@@ -578,31 +578,37 @@
   }
 
   function obterDadosFiltrados(){
-    const filtroTexto = document.getElementById("filtro").value.toLowerCase().trim();
-    unidadeSelecionada = document.getElementById("filtroUnidade").value;
+  const filtroTexto = document.getElementById("filtro").value.toLowerCase().trim();
+  unidadeSelecionada = document.getElementById("filtroUnidade").value;
 
-    return manutencoes.filter(item => {
-      const id = String(item.maquina_id || "");
-      const nome = obterNomeMaquina(id);
-      const unidade = obterUnidadeMaquina(id);
-      const maquinaCompleta = `${nome} - ${id}`.toLowerCase();
-      const tipoFormatado = formatarTipoProblema(item.tipo_problema).toLowerCase();
+  return manutencoes.filter(item => {
+    const id = String(item.maquina_id || "");
+    const nome = obterNomeMaquina(id);
+    const unidade = obterUnidadeMaquina(id);
+    const maquinaCompleta = `${nome} - ${id}`.toLowerCase();
+    const tipoFormatado = formatarTipoProblema(item.tipo_problema).toLowerCase();
+    const descricao = (item.descricao || "").toLowerCase();
 
-      if(unidadeSelecionada === "centro" && unidade !== "DUO CENTRO"){
-        return false;
-      }
+    if(unidadeSelecionada === "centro" && unidade !== "DUO CENTRO"){
+      return false;
+    }
 
-      if(unidadeSelecionada === "heliopolis" && unidade !== "DUO HELIÓPOLIS"){
-        return false;
-      }
+    if(unidadeSelecionada === "heliopolis" && unidade !== "DUO HELIÓPOLIS"){
+      return false;
+    }
 
-      if(filtroTexto && !maquinaCompleta.includes(filtroTexto) && !tipoFormatado.includes(filtroTexto)){
-        return false;
-      }
+    if(
+      filtroTexto &&
+      !maquinaCompleta.includes(filtroTexto) &&
+      !tipoFormatado.includes(filtroTexto) &&
+      !descricao.includes(filtroTexto)
+    ){
+      return false;
+    }
 
-      return true;
-    });
-  }
+    return true;
+  });
+}
 
   function calcularMetricas(dadosFiltrados){
     const total = dadosFiltrados.length;
