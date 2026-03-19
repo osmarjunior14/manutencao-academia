@@ -3,141 +3,642 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registrar Problema</title>
+  <title>Registrar manutenção</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body{
-      font-family: Arial;
-      background:#f5f7fb;
-      padding:20px;
-      text-align:center;
+      min-height:100vh;
+      font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #163a74 0%, #0b1838 45%, #071126 100%);
+      color:#ffffff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px 16px;
+    }
+
+    .wrapper{
+      width:100%;
+      max-width:460px;
     }
 
     .card{
-      max-width:500px;
-      margin:auto;
-      background:#fff;
-      padding:20px;
-      border-radius:12px;
-      box-shadow:0 10px 25px rgba(0,0,0,0.1);
+      background:rgba(17, 28, 53, 0.92);
+      border:1px solid rgba(255,255,255,0.08);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      border-radius:28px;
+      padding:28px 20px 22px;
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.04);
     }
 
-    h2{
+    .header{
+      text-align:center;
+      margin-bottom:22px;
+    }
+
+    .header .badge-top{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(34,197,94,0.14);
+      color:#86efac;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:14px;
+      letter-spacing:0.2px;
+    }
+
+    .header h1{
+      font-size:34px;
+      line-height:1.05;
+      font-weight:800;
+      letter-spacing:-0.8px;
+      margin-bottom:8px;
+    }
+
+    .header p{
+      color:rgba(255,255,255,0.72);
+      font-size:15px;
+      line-height:1.45;
+    }
+
+    .machine-box{
+      margin-top:6px;
+      margin-bottom:18px;
+      padding:16px 16px;
+      border-radius:20px;
+      background:linear-gradient(135deg, #27b8f5 0%, #1490e6 100%);
+      box-shadow:0 14px 30px rgba(20,144,230,0.28);
+    }
+
+    .machine-label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      font-weight:700;
+      opacity:0.85;
+      margin-bottom:6px;
+    }
+
+    .machine-name{
+      font-size:27px;
+      font-weight:800;
+      line-height:1.1;
+      letter-spacing:-0.5px;
+      word-break:break-word;
+    }
+
+    .form-group{
+      margin-top:14px;
+    }
+
+    .field-label{
+      display:block;
+      font-size:14px;
+      font-weight:700;
+      color:rgba(255,255,255,0.86);
       margin-bottom:10px;
     }
 
-    select, textarea, button{
+    .select-field,
+    textarea{
       width:100%;
-      padding:12px;
-      margin-top:10px;
-      border-radius:8px;
-      border:1px solid #ddd;
-      font-size:16px;
-    }
-
-    button{
-      background:#2563eb;
-      color:#fff;
       border:none;
-      font-weight:bold;
+      outline:none;
+      border-radius:20px;
+      padding:18px 16px;
+      background:#f7f8fb;
+      color:#0f172a;
+      font-size:17px;
+      line-height:1.45;
+      box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    textarea{
+      min-height:150px;
+      resize:none;
+    }
+
+    textarea::placeholder{
+      color:#94a3b8;
+    }
+
+    .helper{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:8px;
+      font-size:13px;
+      color:rgba(255,255,255,0.62);
+    }
+
+    .button{
+      width:100%;
+      margin-top:18px;
+      border:none;
+      border-radius:20px;
+      padding:18px 20px;
+      background:linear-gradient(135deg, #31d66b 0%, #22c55e 100%);
+      color:white;
+      font-size:22px;
+      font-weight:800;
       cursor:pointer;
+      box-shadow:0 14px 30px rgba(34,197,94,0.28);
+      transition:transform .12s ease, filter .12s ease;
     }
 
-    button:hover{
-      opacity:0.9;
+    .button:active{
+      transform:scale(0.985);
+      filter:brightness(0.98);
     }
 
-    .ok{
-      color:green;
-      margin-top:10px;
+    .button:disabled{
+      opacity:0.7;
+      cursor:not-allowed;
+    }
+
+    .message{
+      display:none;
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:16px;
+      font-size:15px;
+      font-weight:700;
+      line-height:1.4;
+    }
+
+    .message.success{
+      display:block;
+      background:rgba(34,197,94,0.14);
+      color:#86efac;
+      border:1px solid rgba(34,197,94,0.25);
+    }
+
+    .message.error{
+      display:block;
+      background:rgba(239,68,68,0.14);
+      color:#fca5a5;
+      border:1px solid rgba(239,68,68,0.24);
+    }
+
+    .footer-note{
+      text-align:center;
+      margin-top:18px;
+      color:rgba(255,255,255,0.45);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .alerta-problemas{
+      display:none;
+      margin-bottom:18px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255, 193, 7, 0.14);
+      border:1px solid rgba(255, 193, 7, 0.28);
+      color:#ffe08a;
+    }
+
+    .alerta-problemas strong{
+      display:block;
+      font-size:15px;
+      margin-bottom:8px;
+      color:#ffd45c;
+    }
+
+    .alerta-problemas p{
+      font-size:14px;
+      line-height:1.45;
+      color:#fff3c4;
+      margin-bottom:10px;
+    }
+
+    .alerta-problemas ul{
+      margin-left:18px;
+      margin-bottom:14px;
+    }
+
+    .alerta-problemas li{
+      margin-bottom:6px;
+      line-height:1.4;
+      color:#fff7d6;
+    }
+
+    .alerta-acoes{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .alerta-botao{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:14px 16px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .12s ease, filter .12s ease;
+    }
+
+    .alerta-botao:active{
+      transform:scale(0.985);
+      filter:brightness(0.98);
+    }
+
+    .alerta-botao.continuar{
+      background:linear-gradient(135deg, #31d66b 0%, #22c55e 100%);
+      color:#ffffff;
+      box-shadow:0 12px 24px rgba(34,197,94,0.18);
+    }
+
+    .alerta-botao.cancelar{
+      background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color:#ffffff;
+      box-shadow:0 12px 24px rgba(239,68,68,0.18);
+    }
+
+    @media (max-width: 430px){
+      .card{
+        border-radius:24px;
+        padding:24px 16px 20px;
+      }
+
+      .header h1{
+        font-size:29px;
+      }
+
+      .machine-name{
+        font-size:23px;
+      }
+
+      .button{
+        font-size:20px;
+      }
     }
   </style>
 </head>
 <body>
 
-<div class="card">
+<div class="wrapper">
+  <div class="card">
 
-  <h2 id="tituloMaquina">Carregando...</h2>
+    <div class="header">
+      <div class="badge-top">● Sistema de Manutenção - DUO Academia</div>
+      <h1>Registrar Manutenção</h1>
+      <p>Selecione o tipo de problema encontrado neste equipamento.</p>
+    </div>
 
-  <p>Selecione o problema encontrado:</p>
+    <div class="machine-box">
+      <div class="machine-label">Equipamento</div>
+      <div class="machine-name" id="maquina">Carregando máquina...</div>
+    </div>
 
-  <select id="problema">
-    <option value="">Selecione</option>
-    <option value="barulho_anormal">Barulho anormal</option>
-    <option value="cabo_rompido">Cabo rompido</option>
-    <option value="choque_eletrico">Choque elétrico</option>
-    <option value="corrente_ou_correia_com_defeito">Corrente/correia com defeito</option>
-    <option value="equipamento_travando">Equipamento travando</option>
-    <option value="estrutura_solta">Estrutura solta</option>
-    <option value="estofado_rasgado">Estofado rasgado</option>
-    <option value="lubrificacao_necessaria">Lubrificação necessária</option>
-    <option value="painel_ou_display_com_defeito">Painel/display com defeito</option>
-    <option value="parafuso_frouxo">Parafuso frouxo</option>
-    <option value="pino_de_ajuste_quebrado">Pino de ajuste quebrado</option>
-    <option value="polia_com_defeito">Polia com defeito</option>
-    <option value="regulagem_com_defeito">Regulagem com defeito</option>
-    <option value="sem_adesivo_de_pesos">Sem adesivo de pesos</option>
-    <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
-    <option value="sem_estofado">Sem estofado</option>
-    <option value="outro">Outro</option>
-  </select>
+    <div id="alertaProblemas" class="alerta-problemas">
+      <strong>⚠️ Esta máquina já possui problemas em aberto</strong>
+      <p>Confira abaixo. Caso seja um problema diferente, você pode registrar normalmente.</p>
+      <ul id="listaProblemas"></ul>
 
-  <textarea id="descricao" placeholder="Descreva o problema..." style="display:none;"></textarea>
+      <div class="alerta-acoes">
+        <button class="alerta-botao continuar" onclick="continuarRegistro()">
+          Registrar um problema diferente
+        </button>
+        <button class="alerta-botao cancelar" onclick="cancelarRegistro()">
+          Não registrar
+        </button>
+      </div>
+    </div>
 
-  <button onclick="enviar()">Registrar problema</button>
+    <div id="formulario">
+      <div class="form-group">
+        <label class="field-label" for="tipoProblema">Tipo de problema</label>
 
-  <p id="msg" class="ok"></p>
+        <select id="tipoProblema" class="select-field" onchange="alternarOutro()">
+          <option value="">Selecione o problema</option>
+          <option value="barulho_anormal">Barulho anormal</option>
+          <option value="cabo_rompido">Cabo rompido</option>
+          <option value="choque_eletrico">Choque elétrico</option>
+          <option value="corrente_ou_correia_com_defeito">Corrente/correia com defeito</option>
+          <option value="equipamento_travando">Equipamento travando</option>
+          <option value="estrutura_solta">Estrutura solta</option>
+          <option value="estofado_rasgado">Estofado rasgado</option>
+          <option value="lubrificacao_necessaria">Lubrificação necessária</option>
+          <option value="painel_ou_display_com_defeito">Painel/display com defeito</option>
+          <option value="parafuso_frouxo">Parafuso frouxo</option>
+          <option value="pino_de_ajuste_quebrado">Pino de ajuste quebrado</option>
+          <option value="polia_com_defeito">Polia com defeito</option>
+          <option value="regulagem_com_defeito">Regulagem com defeito</option>
+          <option value="sem_adesivo_de_pesos">Sem adesivo de pesos</option>
+          <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
+          <option value="sem_estofado">Sem estofado</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
 
+      <div class="form-group" id="outroBox" style="display:none;">
+        <label class="field-label" for="outroProblema">Descreva o problema</label>
+        <textarea
+          id="outroProblema"
+          maxlength="200"
+          placeholder="Descreva o problema..."
+        ></textarea>
+
+        <div class="helper">
+          <span>Máximo de 200 caracteres</span>
+          <span id="contadorCaracteres">0/200</span>
+        </div>
+      </div>
+
+      <button class="button" id="botaoRegistrar" onclick="registrar()">
+        Registrar
+      </button>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <div class="footer-note">
+      Seu registro será enviado para a equipe de manutenção.
+    </div>
+
+  </div>
 </div>
 
 <script>
   const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
   const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
   const params = new URLSearchParams(window.location.search);
   const maquinaId = params.get("id");
 
-  document.getElementById("tituloMaquina").innerText = "Máquina ID: " + maquinaId;
+  let nomeMaquina = "Carregando máquina...";
 
-  document.getElementById("problema").addEventListener("change", function(){
-    if(this.value === "outro"){
-      document.getElementById("descricao").style.display = "block";
-    } else {
-      document.getElementById("descricao").style.display = "none";
-    }
+  const tipoProblemaMap = {
+    "barulho_anormal":"Barulho anormal",
+    "cabo_rompido":"Cabo rompido",
+    "choque_eletrico":"Choque elétrico",
+    "corrente_ou_correia_com_defeito":"Corrente/correia com defeito",
+    "equipamento_travando":"Equipamento travando",
+    "estrutura_solta":"Estrutura solta",
+    "estofado_rasgado":"Estofado rasgado",
+    "lubrificacao_necessaria":"Lubrificação necessária",
+    "painel_ou_display_com_defeito":"Painel/display com defeito",
+    "parafuso_frouxo":"Parafuso frouxo",
+    "pino_de_ajuste_quebrado":"Pino de ajuste quebrado",
+    "polia_com_defeito":"Polia com defeito",
+    "regulagem_com_defeito":"Regulagem com defeito",
+    "sem_adesivo_de_pesos":"Sem adesivo de pesos",
+    "sem_carga_ou_resistencia":"Sem carga ou resistência",
+    "sem_estofado":"Sem estofado",
+    "outro":"Outro"
+  };
+
+  const tipoProblemaEl = document.getElementById("tipoProblema");
+  const outroProblemaEl = document.getElementById("outroProblema");
+  const contadorEl = document.getElementById("contadorCaracteres");
+  const msgEl = document.getElementById("msg");
+  const botaoEl = document.getElementById("botaoRegistrar");
+  const alertaProblemasEl = document.getElementById("alertaProblemas");
+  const listaProblemasEl = document.getElementById("listaProblemas");
+  const formularioEl = document.getElementById("formulario");
+
+  outroProblemaEl.addEventListener("input", () => {
+    contadorEl.textContent = `${outroProblemaEl.value.length}/200`;
   });
 
-  async function enviar(){
-    const tipo = document.getElementById("problema").value;
-    const descricao = document.getElementById("descricao").value;
+  function alternarOutro(){
+    const tipo = tipoProblemaEl.value;
+    const outroBox = document.getElementById("outroBox");
 
-    if(!tipo){
-      alert("Selecione o problema");
-      return;
+    if(tipo === "outro"){
+      outroBox.style.display = "block";
+    } else {
+      outroBox.style.display = "none";
+      outroProblemaEl.value = "";
+      contadorEl.textContent = "0/200";
     }
-
-    const { error } = await supabase
-      .from("manutencao_academia")
-      .insert([
-        {
-          maquina_id: maquinaId,
-          tipo_problema: tipo,
-          descricao: tipo === "outro" ? descricao : "",
-          status: "aberto",
-          data: new Date().toISOString()
-        }
-      ]);
-
-    if(error){
-      alert("Erro ao registrar: " + error.message);
-      return;
-    }
-
-    document.getElementById("msg").innerText = "Problema registrado com sucesso!";
   }
+
+  function mostrarMensagem(tipo, texto){
+    msgEl.className = `message ${tipo}`;
+    msgEl.textContent = texto;
+  }
+
+  function continuarRegistro(){
+    alertaProblemasEl.style.display = "none";
+    formularioEl.style.display = "block";
+  }
+
+  function cancelarRegistro(){
+    formularioEl.style.display = "none";
+    mostrarMensagem("success", "Ok. Nenhum novo problema foi registrado.");
+  }
+
+  async function carregarNomeMaquina(){
+    if(!maquinaId){
+      document.getElementById("maquina").innerText = "Máquina não encontrada";
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("maquinarios")
+      .select("nome, unidade")
+      .eq("maquina_id", maquinaId)
+      .single();
+
+    if(error || !data){
+      console.log("Erro ao buscar maquinário:", error);
+      nomeMaquina = "Máquina não encontrada";
+      document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
+      return;
+    }
+
+    nomeMaquina = `${data.unidade} - ${data.nome}`;
+    document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
+  }
+
+  async function verificarProblemasEmAberto(){
+    if(!maquinaId){
+      formularioEl.style.display = "none";
+      mostrarMensagem("error", "ID da máquina não encontrado na URL.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabaseClient
+        .from("manutencao_academia")
+        .select("tipo_problema, descricao, status")
+        .eq("maquina_id", maquinaId)
+        .eq("status", "aberto");
+
+      if(error){
+        throw error;
+      }
+
+      listaProblemasEl.innerHTML = "";
+
+      if(data && data.length > 0){
+        data.forEach(item => {
+          const li = document.createElement("li");
+
+          let texto = tipoProblemaMap[item.tipo_problema] || item.tipo_problema || "Problema em aberto";
+
+          if(item.tipo_problema === "outro" && item.descricao){
+            texto = item.descricao;
+          }
+
+          li.textContent = texto;
+          listaProblemasEl.appendChild(li);
+        });
+
+        alertaProblemasEl.style.display = "block";
+        formularioEl.style.display = "none";
+      } else {
+        alertaProblemasEl.style.display = "none";
+        formularioEl.style.display = "block";
+      }
+    } catch (error) {
+      console.log("Erro ao verificar problemas em aberto:", error);
+      alertaProblemasEl.style.display = "none";
+      formularioEl.style.display = "block";
+    }
+  }
+
+  async function registrar(){
+    const tipoProblema = tipoProblemaEl.value;
+    const outroProblemaOriginal = outroProblemaEl.value.trim();
+    const outroProblemaComparacao = outroProblemaOriginal.toLowerCase();
+
+    if(!maquinaId){
+      mostrarMensagem("error", "ID da máquina não encontrado na URL.");
+      return;
+    }
+
+    if(!tipoProblema){
+      mostrarMensagem("error", "Selecione o tipo de problema.");
+      return;
+    }
+
+    if(tipoProblema === "outro" && !outroProblemaOriginal){
+      mostrarMensagem("error", "Descreva o problema na opção 'Outro'.");
+      return;
+    }
+
+    botaoEl.disabled = true;
+    botaoEl.textContent = "Enviando...";
+    msgEl.className = "message";
+    msgEl.textContent = "";
+
+    const descricao = tipoProblema === "outro" ? outroProblemaOriginal : "";
+    const textoTelegram = tipoProblema === "outro"
+      ? `Outro - ${outroProblemaOriginal}`
+      : (tipoProblemaMap[tipoProblema] || tipoProblema);
+
+    let consultaDuplicidade = supabaseClient
+      .from("manutencao_academia")
+      .select("id, descricao")
+      .eq("maquina_id", maquinaId)
+      .eq("tipo_problema", tipoProblema)
+      .eq("status", "aberto");
+
+    const { data: existentes, error: erroDuplicidade } = await consultaDuplicidade;
+
+    if(erroDuplicidade){
+      console.log("Erro ao verificar duplicidade:", erroDuplicidade);
+      mostrarMensagem("error", "Erro ao verificar duplicidade. Tente novamente.");
+      botaoEl.disabled = false;
+      botaoEl.textContent = "Registrar";
+      return;
+    }
+
+    let duplicado = false;
+
+    if(tipoProblema === "outro"){
+      duplicado = (existentes || []).some(item =>
+        String(item.descricao || "").trim().toLowerCase() === outroProblemaComparacao
+      );
+    } else {
+      duplicado = (existentes || []).length > 0;
+    }
+
+    if(duplicado){
+      mostrarMensagem("error", "⚠️ Esse problema já foi registrado e ainda está em aberto.");
+      botaoEl.disabled = false;
+      botaoEl.textContent = "Registrar";
+      return;
+    }
+
+    try {
+      const { error } = await supabaseClient
+        .from("manutencao_academia")
+        .insert([
+          {
+            maquina_id: maquinaId,
+            tipo_problema: tipoProblema,
+            descricao: descricao,
+            data: new Date().toISOString(),
+            status: "aberto"
+          }
+        ]);
+
+      if(error){
+        throw error;
+      }
+
+      try {
+        await fetch("https://chyomxetiloktyepjbtk.supabase.co/functions/v1/super-function", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            maquina: nomeMaquina + " - " + maquinaId,
+            descricao: textoTelegram,
+            data: new Date().toLocaleString("pt-BR")
+          })
+        });
+      } catch (erroTelegram) {
+        console.log("Erro ao enviar notificação Telegram:", erroTelegram);
+      }
+
+      mostrarMensagem("success", "✅ Problema registrado com sucesso.");
+      tipoProblemaEl.value = "";
+      outroProblemaEl.value = "";
+      document.getElementById("outroBox").style.display = "none";
+      contadorEl.textContent = "0/200";
+
+      await verificarProblemasEmAberto();
+
+    } catch (error) {
+      mostrarMensagem("error", "Erro ao registrar manutenção. Tente novamente.");
+      console.log("Erro ao registrar:", error);
+    } finally {
+      botaoEl.disabled = false;
+      botaoEl.textContent = "Registrar";
+    }
+  }
+
+  async function iniciarPagina(){
+    await carregarNomeMaquina();
+    await verificarProblemasEmAberto();
+  }
+
+  iniciarPagina();
 </script>
 
 </body>
