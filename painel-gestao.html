@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel de Gestão</title>
+</head>
+<body>
+<script>
+  const acessoLiberado = localStorage.getItem("duo_gestao_logado");
+
+  if(acessoLiberado === "sim"){
+    window.location.href = "./painel.html?modo=gestao";
+  } else {
+    window.location.href = "./login.html";
+  }
+</script>
+</body>
+</html>
