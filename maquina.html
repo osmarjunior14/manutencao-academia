@@ -3,636 +3,838 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registrar manutenção</title>
+  <title>Maquinários - DUO</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    :root{
+      --bg-1:#0f172a;
+      --bg-2:#111827;
+      --card:#1e293b;
+      --card-2:#334155;
+      --line:#475569;
+      --text:#ffffff;
+      --muted:#94a3b8;
+      --green:#22c55e;
+      --green-2:#16a34a;
+      --blue:#3b82f6;
+      --blue-2:#2563eb;
+      --red:#ef4444;
+      --red-2:#dc2626;
+      --amber:#f59e0b;
+      --amber-2:#d97706;
+      --shadow:0 12px 28px rgba(0,0,0,0.24);
+    }
+
     *{
       box-sizing:border-box;
-      margin:0;
-      padding:0;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body{
-      min-height:100vh;
-      font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      margin:0;
+      padding:20px;
+      font-family:Inter, Arial, sans-serif;
       background:
-        radial-gradient(circle at top, #163a74 0%, #0b1838 45%, #071126 100%);
-      color:#ffffff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px 16px;
+        radial-gradient(circle at top left, rgba(59,130,246,0.16) 0%, transparent 25%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      color:var(--text);
     }
 
-    .wrapper{
-      width:100%;
-      max-width:460px;
+    .container{
+      max-width:1200px;
+      margin:0 auto;
     }
 
-    .card{
-      background:rgba(17, 28, 53, 0.92);
-      border:1px solid rgba(255,255,255,0.08);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      border-radius:28px;
-      padding:28px 20px 22px;
-      box-shadow:
-        0 20px 60px rgba(0,0,0,0.35),
-        inset 0 1px 0 rgba(255,255,255,0.04);
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(30px, 4vw, 42px);
+      font-weight:900;
+      letter-spacing:-1px;
     }
 
-    .header{
-      text-align:center;
-      margin-bottom:22px;
-    }
-
-    .header .badge-top{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 14px;
-      border-radius:999px;
-      background:rgba(34,197,94,0.14);
-      color:#86efac;
-      font-size:13px;
-      font-weight:700;
-      margin-bottom:14px;
-      letter-spacing:0.2px;
-    }
-
-    .header h1{
-      font-size:34px;
-      line-height:1.05;
-      font-weight:800;
-      letter-spacing:-0.8px;
-      margin-bottom:8px;
-    }
-
-    .header p{
-      color:rgba(255,255,255,0.72);
+    .subtitulo{
+      margin:0 0 22px;
+      color:var(--muted);
       font-size:15px;
-      line-height:1.45;
     }
 
-    .machine-box{
-      margin-top:6px;
+    .topo-acoes{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .linha-busca{
       margin-bottom:18px;
-      padding:16px 16px;
-      border-radius:20px;
-      background:linear-gradient(135deg, #27b8f5 0%, #1490e6 100%);
-      box-shadow:0 14px 30px rgba(20,144,230,0.28);
     }
 
-    .machine-label{
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:1px;
-      font-weight:700;
-      opacity:0.85;
-      margin-bottom:6px;
-    }
-
-    .machine-name{
-      font-size:27px;
-      font-weight:800;
-      line-height:1.1;
-      letter-spacing:-0.5px;
-      word-break:break-word;
-    }
-
-    .form-group{
-      margin-top:14px;
-    }
-
-    .field-label{
-      display:block;
-      font-size:14px;
-      font-weight:700;
-      color:rgba(255,255,255,0.86);
-      margin-bottom:10px;
-    }
-
-    .select-field,
-    textarea{
+    .campo-busca{
       width:100%;
       border:none;
       outline:none;
-      border-radius:20px;
-      padding:18px 16px;
-      background:#f7f8fb;
+      border-radius:14px;
+      padding:14px 16px;
+      background:#f8fafc;
       color:#0f172a;
-      font-size:17px;
-      line-height:1.45;
-      box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);
+      font-size:15px;
+      box-shadow:var(--shadow);
     }
 
-    textarea{
-      min-height:150px;
-      resize:none;
+    .painel-form{
+      display:none;
+      margin-bottom:20px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter:blur(10px);
     }
 
-    textarea::placeholder{
-      color:#94a3b8;
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr 1.5fr auto;
+      gap:10px;
+      align-items:end;
     }
 
-    .helper{
+    .campo{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .campo label{
+      font-size:13px;
+      font-weight:700;
+      color:#cbd5e1;
+    }
+
+    .campo input,
+    .campo select{
+      border:none;
+      outline:none;
+      border-radius:12px;
+      padding:12px 14px;
+      font-size:15px;
+      background:#f8fafc;
+      color:#0f172a;
+      min-height:46px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:12px;
+      padding:12px 16px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      transition:all .16s ease;
+      color:#fff;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.02);
+    }
+
+    .btn-add{
+      background:linear-gradient(135deg, var(--green) 0%, var(--green-2) 100%);
+      box-shadow:0 10px 20px rgba(34,197,94,0.18);
+    }
+
+    .btn-geral{
+      background:linear-gradient(135deg, var(--blue) 0%, var(--blue-2) 100%);
+      box-shadow:0 10px 20px rgba(59,130,246,0.18);
+    }
+
+    .btn-cancelar{
+      background:linear-gradient(135deg, #64748b 0%, #475569 100%);
+      box-shadow:0 10px 20px rgba(100,116,139,0.18);
+    }
+
+    .secao{
+      margin-top:24px;
+    }
+
+    .secao h2{
+      margin:0 0 12px;
+      font-size:22px;
+      font-weight:900;
+    }
+
+    .bloco{
+      background:rgba(30,41,59,0.94);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:20px;
+      border-radius:18px;
+      box-shadow:var(--shadow);
+    }
+
+    .linha{
       display:flex;
       justify-content:space-between;
       align-items:center;
-      margin-top:8px;
-      font-size:13px;
-      color:rgba(255,255,255,0.62);
+      gap:14px;
+      padding:14px 0;
+      border-bottom:1px solid var(--line);
     }
 
-    .button{
-      width:100%;
-      margin-top:18px;
-      border:none;
-      border-radius:20px;
-      padding:18px 20px;
-      background:linear-gradient(135deg, #31d66b 0%, #22c55e 100%);
-      color:white;
-      font-size:22px;
+    .linha:last-child{
+      border-bottom:none;
+    }
+
+    .info{
+      flex:1;
+      min-width:0;
+    }
+
+    .titulo-maquina{
+      font-size:16px;
       font-weight:800;
-      cursor:pointer;
-      box-shadow:0 14px 30px rgba(34,197,94,0.28);
-      transition:transform .12s ease, filter .12s ease;
+      color:#fff;
+      line-height:1.35;
+      word-break:break-word;
     }
 
-    .button:active{
-      transform:scale(0.985);
-      filter:brightness(0.98);
+    .subinfo{
+      margin-top:6px;
+      color:#cbd5e1;
+      font-size:14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
     }
 
-    .button:disabled{
-      opacity:0.7;
-      cursor:not-allowed;
+    .status-maquina{
+      margin-top:8px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
     }
 
-    .message{
-      display:none;
-      margin-top:16px;
-      padding:14px 16px;
-      border-radius:16px;
-      font-size:15px;
-      font-weight:700;
-      line-height:1.4;
-    }
-
-    .message.success{
-      display:block;
+    .status-maquina.ok{
       background:rgba(34,197,94,0.14);
       color:#86efac;
       border:1px solid rgba(34,197,94,0.25);
     }
 
-    .message.error{
-      display:block;
+    .status-maquina.alerta{
       background:rgba(239,68,68,0.14);
       color:#fca5a5;
       border:1px solid rgba(239,68,68,0.24);
     }
 
-    .footer-note{
-      text-align:center;
-      margin-top:18px;
-      color:rgba(255,255,255,0.45);
-      font-size:12px;
-      line-height:1.4;
+    .acoes{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      flex-shrink:0;
     }
 
-    .alerta-problemas{
-      display:none;
-      margin-bottom:18px;
+    .btn-qr{
+      background:linear-gradient(135deg, var(--blue) 0%, var(--blue-2) 100%);
+    }
+
+    .btn-editar{
+      background:linear-gradient(135deg, var(--amber) 0%, var(--amber-2) 100%);
+    }
+
+    .btn-excluir{
+      background:linear-gradient(135deg, var(--red) 0%, var(--red-2) 100%);
+    }
+
+    .vazio{
+      color:var(--muted);
+      font-style:italic;
+      background:rgba(255,255,255,0.04);
+      border:1px dashed rgba(255,255,255,0.14);
+      border-radius:14px;
       padding:16px;
-      border-radius:18px;
-      background:rgba(255, 193, 7, 0.14);
-      border:1px solid rgba(255, 193, 7, 0.28);
-      color:#ffe08a;
     }
 
-    .alerta-problemas strong{
-      display:block;
-      font-size:15px;
-      margin-bottom:8px;
-      color:#ffd45c;
+    .modal-shell{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,0.65);
+      z-index:9999;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
     }
 
-    .alerta-problemas p{
+    .modal-card{
+      width:100%;
+      max-width:460px;
+      background:#fff;
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 20px 50px rgba(0,0,0,0.28);
+    }
+
+    .modal-card h3{
+      margin:0 0 8px;
+      color:#0f172a;
+      font-weight:900;
+    }
+
+    .modal-card p{
+      margin:0 0 14px;
+      color:#64748b;
       font-size:14px;
-      line-height:1.45;
-      color:#fff3c4;
+    }
+
+    .modal-card input,
+    .modal-card select{
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius:12px;
+      padding:12px 14px;
+      background:#f8fafc;
+      color:#0f172a;
+      min-height:46px;
       margin-bottom:10px;
     }
 
-    .alerta-problemas ul{
-      margin-left:18px;
-      margin-bottom:14px;
-    }
-
-    .alerta-problemas li{
-      margin-bottom:6px;
-      line-height:1.4;
-      color:#fff7d6;
-    }
-
-    .alerta-acoes{
+    .modal-acoes{
       display:flex;
-      flex-direction:column;
       gap:10px;
+      margin-top:10px;
     }
 
-    .alerta-botao{
-      width:100%;
-      border:none;
-      border-radius:14px;
-      padding:14px 16px;
-      font-size:15px;
-      font-weight:800;
-      cursor:pointer;
-      transition:transform .12s ease, filter .12s ease;
+    .modal-acoes .btn{
+      flex:1;
     }
 
-    .alerta-botao:active{
-      transform:scale(0.985);
-      filter:brightness(0.98);
+    @media (max-width: 900px){
+      .form-grid{
+        grid-template-columns:1fr;
+      }
     }
 
-    .alerta-botao.continuar{
-      background:linear-gradient(135deg, #31d66b 0%, #22c55e 100%);
-      color:#ffffff;
-      box-shadow:0 12px 24px rgba(34,197,94,0.18);
-    }
-
-    .alerta-botao.cancelar{
-      background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color:#ffffff;
-      box-shadow:0 12px 24px rgba(239,68,68,0.18);
-    }
-
-    @media (max-width: 430px){
-      .card{
-        border-radius:24px;
-        padding:24px 16px 20px;
+    @media (max-width: 700px){
+      .linha{
+        flex-direction:column;
+        align-items:flex-start;
       }
 
-      .header h1{
-        font-size:29px;
+      .acoes{
+        width:100%;
       }
 
-      .machine-name{
-        font-size:23px;
-      }
-
-      .button{
-        font-size:20px;
+      .acoes .btn{
+        flex:1;
       }
     }
   </style>
 </head>
 <body>
 
-<div class="wrapper">
-  <div class="card">
+<div class="container">
 
-    <div class="header">
-      <div class="badge-top">● Sistema de Manutenção - DUO Academia</div>
-      <h1>Registrar Manutenção</h1>
-      <p>Selecione o tipo de problema encontrado neste equipamento.</p>
-    </div>
+  <h1>📋 Maquinários</h1>
+  <p class="subtitulo">Cadastre, edite, organize e gere QR Codes dos equipamentos das unidades DUO.</p>
 
-    <div class="machine-box">
-      <div class="machine-label">Equipamento</div>
-      <div class="machine-name" id="maquina">Carregando máquina...</div>
-    </div>
+  <div class="topo-acoes">
+    <button class="btn btn-add" onclick="abrirForm()">+ Adicionar Maquinário</button>
+    <button class="btn btn-geral" onclick="gerarTodosQRCodes()">Gerar todos os QR Codes</button>
+  </div>
 
-    <div id="alertaProblemas" class="alerta-problemas">
-      <strong>⚠️ Esta máquina já possui problemas em aberto</strong>
-      <p>Confira abaixo. Caso seja um problema diferente, você pode registrar normalmente.</p>
-      <ul id="listaProblemas"></ul>
+  <div class="linha-busca">
+    <input
+      id="busca"
+      class="campo-busca"
+      placeholder="Buscar por ID, nome ou unidade..."
+    >
+  </div>
 
-      <div class="alerta-acoes">
-        <button class="alerta-botao continuar" onclick="continuarRegistro()">
-          Registrar um problema diferente
-        </button>
-        <button class="alerta-botao cancelar" onclick="cancelarRegistro()">
-          Não registrar
-        </button>
-      </div>
-    </div>
-
-    <div id="formulario">
-      <div class="form-group">
-        <label class="field-label" for="tipoProblema">Tipo de problema</label>
-
-        <select id="tipoProblema" class="select-field" onchange="alternarOutro()">
-          <option value="">Selecione o problema</option>
-          <option value="barulho_anormal">Barulho anormal</option>
-          <option value="cabo_rompido">Cabo rompido</option>
-          <option value="choque_eletrico">Choque elétrico</option>
-          <option value="corrente_ou_correia_com_defeito">Corrente/correia com defeito</option>
-          <option value="equipamento_travando">Equipamento travando</option>
-          <option value="estrutura_solta">Estrutura solta</option>
-          <option value="estofado_rasgado">Estofado rasgado</option>
-          <option value="lubrificacao_necessaria">Lubrificação necessária</option>
-          <option value="painel_ou_display_com_defeito">Painel/display com defeito</option>
-          <option value="parafuso_frouxo">Parafuso frouxo</option>
-          <option value="pino_de_ajuste_quebrado">Pino de ajuste quebrado</option>
-          <option value="polia_com_defeito">Polia com defeito</option>
-          <option value="regulagem_com_defeito">Regulagem com defeito</option>
-          <option value="sem_adesivo_de_pesos">Sem adesivo de pesos</option>
-          <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
-          <option value="sem_estofado">Sem estofado</option>
-          <option value="outro">Outro</option>
+  <div class="painel-form" id="formPainel">
+    <div class="form-grid">
+      <div class="campo">
+        <label for="unidade">Unidade</label>
+        <select id="unidade">
+          <option value="DUO HELIÓPOLIS">DUO HELIÓPOLIS</option>
+          <option value="DUO CENTRO">DUO CENTRO</option>
         </select>
       </div>
 
-      <div class="form-group" id="outroBox" style="display:none;">
-        <label class="field-label" for="outroProblema">Descreva o problema</label>
-        <textarea
-          id="outroProblema"
-          maxlength="200"
-          placeholder="Descreva o problema..."
-        ></textarea>
-
-        <div class="helper">
-          <span>Máximo de 200 caracteres</span>
-          <span id="contadorCaracteres">0/200</span>
-        </div>
+      <div class="campo">
+        <label for="id">ID</label>
+        <input id="id" placeholder="Ex: 101 ou centro-74">
       </div>
 
-      <button class="button" id="botaoRegistrar" onclick="registrar()">
-        Registrar
-      </button>
+      <div class="campo">
+        <label for="nome">Nome do maquinário</label>
+        <input id="nome" placeholder="Nome da máquina">
+      </div>
+
+      <div class="campo">
+        <label>&nbsp;</label>
+        <button class="btn btn-add" onclick="salvar()">Salvar</button>
+      </div>
     </div>
 
-    <div id="msg" class="message"></div>
-
-    <div class="footer-note">
-      Seu registro será enviado para a equipe de manutenção.
+    <div style="margin-top:10px;">
+      <button class="btn btn-cancelar" onclick="fecharForm()">Cancelar</button>
     </div>
+  </div>
 
+  <div class="secao">
+    <h2>🏋️ DUO HELIÓPOLIS</h2>
+    <div id="heliopolis" class="bloco"></div>
+  </div>
+
+  <div class="secao">
+    <h2>🏋️ DUO CENTRO</h2>
+    <div id="centro" class="bloco"></div>
+  </div>
+
+</div>
+
+<div id="modalEdicao" class="modal-shell">
+  <div class="modal-card">
+    <h3>Editar maquinário</h3>
+    <p>Altere os dados abaixo.</p>
+
+    <select id="editUnidade">
+      <option value="DUO HELIÓPOLIS">DUO HELIÓPOLIS</option>
+      <option value="DUO CENTRO">DUO CENTRO</option>
+    </select>
+
+    <input id="editId" placeholder="ID do maquinário">
+    <input id="editNome" placeholder="Nome do maquinário">
+
+    <div class="modal-acoes">
+      <button class="btn btn-cancelar" onclick="fecharModalEdicao()">Cancelar</button>
+      <button class="btn btn-editar" onclick="salvarEdicao()">Salvar</button>
+    </div>
   </div>
 </div>
 
 <script>
-  const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
-  const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
-  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+  const supabaseClient = window.supabase.createClient(
+    "https://chyomxetiloktyepjbtk.supabase.co",
+    "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
+  );
 
-  const params = new URLSearchParams(window.location.search);
-  const maquinaId = params.get("id");
+  let maquinarios = [];
+  let manutencoesAbertas = [];
+  let maquinaEditandoPk = null;
 
-  let nomeMaquina = "Carregando máquina...";
-
-  const tipoProblemaMap = {
-    "barulho_anormal":"Barulho anormal",
-    "cabo_rompido":"Cabo rompido",
-    "choque_eletrico":"Choque elétrico",
-    "corrente_ou_correia_com_defeito":"Corrente/correia com defeito",
-    "equipamento_travando":"Equipamento travando",
-    "estrutura_solta":"Estrutura solta",
-    "estofado_rasgado":"Estofado rasgado",
-    "lubrificacao_necessaria":"Lubrificação necessária",
-    "painel_ou_display_com_defeito":"Painel/display com defeito",
-    "parafuso_frouxo":"Parafuso frouxo",
-    "pino_de_ajuste_quebrado":"Pino de ajuste quebrado",
-    "polia_com_defeito":"Polia com defeito",
-    "regulagem_com_defeito":"Regulagem com defeito",
-    "sem_adesivo_de_pesos":"Sem adesivo de pesos",
-    "sem_carga_ou_resistencia":"Sem carga ou resistência",
-    "sem_estofado":"Sem estofado",
-    "outro":"Outro"
-  };
-
-  const tipoProblemaEl = document.getElementById("tipoProblema");
-  const outroProblemaEl = document.getElementById("outroProblema");
-  const contadorEl = document.getElementById("contadorCaracteres");
-  const msgEl = document.getElementById("msg");
-  const botaoEl = document.getElementById("botaoRegistrar");
-  const alertaProblemasEl = document.getElementById("alertaProblemas");
-  const listaProblemasEl = document.getElementById("listaProblemas");
-  const formularioEl = document.getElementById("formulario");
-
-  outroProblemaEl.addEventListener("input", () => {
-    contadorEl.textContent = `${outroProblemaEl.value.length}/200`;
-  });
-
-  function alternarOutro(){
-    const tipo = tipoProblemaEl.value;
-    const outroBox = document.getElementById("outroBox");
-
-    if(tipo === "outro"){
-      outroBox.style.display = "block";
-    } else {
-      outroBox.style.display = "none";
-      outroProblemaEl.value = "";
-      contadorEl.textContent = "0/200";
-    }
+  function abrirForm(){
+    document.getElementById("formPainel").style.display = "block";
   }
 
-  function mostrarMensagem(tipo, texto){
-    msgEl.className = `message ${tipo}`;
-    msgEl.textContent = texto;
+  function fecharForm(){
+    document.getElementById("formPainel").style.display = "none";
+    document.getElementById("unidade").value = "DUO HELIÓPOLIS";
+    document.getElementById("id").value = "";
+    document.getElementById("nome").value = "";
   }
 
-  function continuarRegistro(){
-    alertaProblemasEl.style.display = "none";
-    formularioEl.style.display = "block";
-  }
+  async function salvar(){
+    const unidade = document.getElementById("unidade").value;
+    const id = document.getElementById("id").value.trim();
+    const nome = document.getElementById("nome").value.trim();
 
-  function cancelarRegistro(){
-    formularioEl.style.display = "none";
-    mostrarMensagem("success", "Ok. Nenhum novo problema foi registrado.");
-  }
-
-  async function carregarNomeMaquina(){
-  if(!maquinaId){
-    document.getElementById("maquina").innerText = "Máquina não encontrada";
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("maquinarios")
-    .select("nome, unidade")
-    .eq("maquina_id", maquinaId)
-    .single();
-
-  if(error || !data){
-    console.log("Erro ao buscar maquinário:", error);
-    nomeMaquina = "Máquina não encontrada";
-    document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
-    return;
-  }
-
-  nomeMaquina = `${data.unidade} - ${data.nome}`;
-  document.getElementById("maquina").innerText = nomeMaquina + " - " + maquinaId;
-}
-
-  async function verificarProblemasEmAberto(){
-    if(!maquinaId){
-      formularioEl.style.display = "none";
-      mostrarMensagem("error", "ID da máquina não encontrado na URL.");
+    if(!id || !nome){
+      alert("Preencha todos os campos.");
       return;
     }
 
-    try {
-      const { data, error } = await supabaseClient
+    const { error } = await supabaseClient
+      .from("maquinarios")
+      .insert([{ unidade, maquina_id: id, nome }]);
+
+    if(error){
+      console.log("Erro ao salvar:", error);
+      alert("Erro ao salvar maquinário.");
+      return;
+    }
+
+    fecharForm();
+    carregar();
+  }
+
+  function gerarQR(id){
+    const url = `${location.origin}/manutencao-academia/maquina.html?id=${encodeURIComponent(id)}`;
+    window.open(
+      `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`,
+      "_blank"
+    );
+  }
+
+  function obterContagemAbertos(){
+    const contagem = {};
+    manutencoesAbertas.forEach(item => {
+      const id = item.maquina_id;
+      contagem[id] = (contagem[id] || 0) + 1;
+    });
+    return contagem;
+  }
+
+  function getBusca(){
+    return document.getElementById("busca").value.toLowerCase().trim();
+  }
+
+  function filtrarMaquinarios(lista){
+    const busca = getBusca();
+
+    if(!busca) return lista;
+
+    return lista.filter(m => {
+      const texto = `${m.maquina_id} ${m.nome} ${m.unidade}`.toLowerCase();
+      return texto.includes(busca);
+    });
+  }
+
+  async function carregar(){
+    const [maquinariosResp, manutencoesResp] = await Promise.all([
+      supabaseClient
+        .from("maquinarios")
+        .select("*")
+        .order("nome"),
+      supabaseClient
         .from("manutencao_academia")
-        .select("tipo_problema, descricao, status")
-        .eq("maquina_id", maquinaId)
-        .eq("status", "aberto");
+        .select("maquina_id")
+        .eq("status", "aberto")
+    ]);
 
-      if(error){
-        throw error;
-      }
+    if(maquinariosResp.error){
+      console.log("Erro ao carregar maquinários:", maquinariosResp.error);
+      alert("Erro ao carregar maquinários.");
+      return;
+    }
 
-      listaProblemasEl.innerHTML = "";
+    if(manutencoesResp.error){
+      console.log("Erro ao carregar problemas em aberto:", manutencoesResp.error);
+      alert("Erro ao carregar problemas em aberto.");
+      return;
+    }
 
-      if(data && data.length > 0){
-        data.forEach(item => {
-          const li = document.createElement("li");
+    maquinarios = maquinariosResp.data || [];
+    manutencoesAbertas = manutencoesResp.data || [];
 
-          let texto = tipoProblemaMap[item.tipo_problema] || item.tipo_problema || "Problema em aberto";
+    render();
+  }
 
-          if(item.tipo_problema === "outro" && item.descricao){
-            texto = item.descricao;
+  function renderBloco(containerId, lista){
+    const container = document.getElementById(containerId);
+    const contagemAbertos = obterContagemAbertos();
+
+    if(lista.length === 0){
+      container.innerHTML = `<div class="vazio">Nenhum maquinário encontrado.</div>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(m => {
+      const quantidadeAbertos = contagemAbertos[m.maquina_id] || 0;
+      const statusHtml = quantidadeAbertos > 0
+        ? `<div class="status-maquina alerta">🔴 ${quantidadeAbertos} em aberto</div>`
+        : `<div class="status-maquina ok">🟢 OK</div>`;
+
+      return `
+        <div class="linha">
+          <div class="info">
+            <div class="titulo-maquina">${m.maquina_id} - ${m.nome}</div>
+            <div class="subinfo">
+              <span><strong>Unidade:</strong> ${m.unidade}</span>
+            </div>
+            ${statusHtml}
+          </div>
+
+          <div class="acoes">
+            <button class="btn btn-qr" onclick="gerarQR('${m.maquina_id}')">QR</button>
+            <button class="btn btn-editar" onclick="abrirModalEdicao('${m.id}', '${escapeJs(m.unidade)}', '${escapeJs(m.maquina_id)}', '${escapeJs(m.nome)}')">Editar</button>
+            <button class="btn btn-excluir" onclick="excluirMaquinario('${m.id}', '${escapeJs(m.nome)}')">Excluir</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function render(){
+    const heliopolis = filtrarMaquinarios(maquinarios.filter(m => m.unidade === "DUO HELIÓPOLIS"));
+    const centro = filtrarMaquinarios(maquinarios.filter(m => m.unidade === "DUO CENTRO"));
+
+    renderBloco("heliopolis", heliopolis);
+    renderBloco("centro", centro);
+  }
+
+  function escapeJs(texto){
+    return String(texto)
+      .replace(/\\/g, "\\\\")
+      .replace(/'/g, "\\'")
+      .replace(/"/g, "&quot;");
+  }
+
+  function abrirModalEdicao(id, unidade, maquinaId, nome){
+    maquinaEditandoPk = id;
+    document.getElementById("editUnidade").value = unidade;
+    document.getElementById("editId").value = maquinaId;
+    document.getElementById("editNome").value = nome;
+    document.getElementById("modalEdicao").style.display = "flex";
+  }
+
+  function fecharModalEdicao(){
+    document.getElementById("modalEdicao").style.display = "none";
+    document.getElementById("editUnidade").value = "DUO HELIÓPOLIS";
+    document.getElementById("editId").value = "";
+    document.getElementById("editNome").value = "";
+    maquinaEditandoPk = null;
+  }
+
+  async function salvarEdicao(){
+    if(!maquinaEditandoPk){
+      alert("Nenhum maquinário selecionado.");
+      return;
+    }
+
+    const unidade = document.getElementById("editUnidade").value;
+    const maquina_id = document.getElementById("editId").value.trim();
+    const nome = document.getElementById("editNome").value.trim();
+
+    if(!maquina_id || !nome){
+      alert("Preencha todos os campos.");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("maquinarios")
+      .update({ unidade, maquina_id, nome })
+      .eq("id", maquinaEditandoPk);
+
+    if(error){
+      console.log("Erro ao editar:", error);
+      alert("Erro ao editar maquinário.");
+      return;
+    }
+
+    fecharModalEdicao();
+    carregar();
+  }
+
+  async function excluirMaquinario(id, nome){
+    const confirmar = confirm(`Tem certeza que deseja excluir o maquinário "${nome}"?`);
+    if(!confirmar) return;
+
+    const { error } = await supabaseClient
+      .from("maquinarios")
+      .delete()
+      .eq("id", id);
+
+    if(error){
+      console.log("Erro ao excluir:", error);
+      alert("Erro ao excluir maquinário.");
+      return;
+    }
+
+    carregar();
+  }
+
+  async function gerarTodosQRCodes(){
+    const { data, error } = await supabaseClient
+      .from("maquinarios")
+      .select("*")
+      .order("unidade")
+      .order("nome");
+
+    if(error){
+      alert("Erro ao carregar maquinários para gerar os QR Codes.");
+      console.log(error);
+      return;
+    }
+
+    let html = `
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title>Todos os QR Codes</title>
+        <style>
+          *{
+            box-sizing:border-box;
           }
 
-          li.textContent = texto;
-          listaProblemasEl.appendChild(li);
-        });
-
-        alertaProblemasEl.style.display = "block";
-        formularioEl.style.display = "none";
-      } else {
-        alertaProblemasEl.style.display = "none";
-        formularioEl.style.display = "block";
-      }
-    } catch (error) {
-      console.log("Erro ao verificar problemas em aberto:", error);
-      alertaProblemasEl.style.display = "none";
-      formularioEl.style.display = "block";
-    }
-  }
-
-  async function registrar(){
-    const tipoProblema = tipoProblemaEl.value;
-    const outroProblema = outroProblemaEl.value.trim().toLowerCase();
-
-    if(!maquinaId){
-      mostrarMensagem("error", "ID da máquina não encontrado na URL.");
-      return;
-    }
-
-    if(!tipoProblema){
-      mostrarMensagem("error", "Selecione o tipo de problema.");
-      return;
-    }
-
-    if(tipoProblema === "outro" && !outroProblema){
-      mostrarMensagem("error", "Descreva o problema na opção 'Outro'.");
-      return;
-    }
-
-    botaoEl.disabled = true;
-    botaoEl.textContent = "Enviando...";
-    msgEl.className = "message";
-    msgEl.textContent = "";
-
-    const descricao = tipoProblema === "outro" ? outroProblema : "";
-    const textoTelegram = tipoProblema === "outro"
-      ? `Outro - ${outroProblema}`
-      : (tipoProblemaMap[tipoProblema] || tipoProblema);
-
-    // 🔒 BLOQUEIO DE DUPLICIDADE
-let consultaDuplicidade = supabaseClient
-  .from("manutencao_academia")
-  .select("id")
-  .eq("maquina_id", maquinaId)
-  .eq("tipo_problema", tipoProblema)
-  .eq("status", "aberto");
-
-if(tipoProblema === "outro"){
-  consultaDuplicidade = consultaDuplicidade.eq("descricao", outroProblema);
-}
-
-const { data: existentes, error: erroDuplicidade } = await consultaDuplicidade;
-
-if(erroDuplicidade){
-  console.log("Erro ao verificar duplicidade:", erroDuplicidade);
-  mostrarMensagem("error", "Erro ao verificar duplicidade. Tente novamente.");
-  botaoEl.disabled = false;
-  botaoEl.textContent = "Registrar";
-  return;
-}
-
-if(existentes && existentes.length > 0){
-  mostrarMensagem("error", "⚠️ Esse problema já foi registrado e ainda está em aberto.");
-  botaoEl.disabled = false;
-  botaoEl.textContent = "Registrar";
-  return;
-}
-    
-    try {
-      const { error } = await supabaseClient
-        .from("manutencao_academia")
-        .insert([
-          {
-            maquina_id: maquinaId,
-            tipo_problema: tipoProblema,
-            descricao: descricao,
-            data: new Date().toISOString(),
-            status: "aberto"
+          body{
+            margin:0;
+            padding:24px;
+            background:#e9e9e9;
+            font-family:Arial, sans-serif;
           }
-        ]);
 
-      if(error){
-        throw error;
-      }
+          .topo{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:24px;
+          }
 
-      try {
-        await fetch("https://chyomxetiloktyepjbtk.supabase.co/functions/v1/super-function", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            maquina: nomeMaquina + " - " + maquinaId,
-            descricao: textoTelegram,
-            data: new Date().toLocaleString("pt-BR")
-          })
-        });
-      } catch (erroTelegram) {
-        console.log("Erro ao enviar notificação Telegram:", erroTelegram);
-      }
+          .topo h1{
+            margin:0;
+            font-size:28px;
+            color:#111827;
+          }
 
-      mostrarMensagem("success", "✅ Problema registrado com sucesso.");
-      tipoProblemaEl.value = "";
-      outroProblemaEl.value = "";
-      document.getElementById("outroBox").style.display = "none";
-      contadorEl.textContent = "0/200";
+          .topo button{
+            padding:12px 18px;
+            border:none;
+            border-radius:10px;
+            background:#2563eb;
+            color:#fff;
+            font-size:16px;
+            font-weight:bold;
+            cursor:pointer;
+          }
 
-      await verificarProblemasEmAberto();
+          .pagina{
+            display:grid;
+            grid-template-columns:repeat(4, 280px);
+            gap:28px 32px;
+            justify-content:center;
+          }
 
-    } catch (error) {
-      mostrarMensagem("error", "Erro ao registrar manutenção. Tente novamente.");
-      console.log("Erro ao registrar:", error);
-    } finally {
-      botaoEl.disabled = false;
-      botaoEl.textContent = "Registrar";
-    }
+          .etiqueta{
+            width:280px;
+            min-height:405px;
+            background:linear-gradient(180deg, #020817 0%, #010b1f 100%);
+            border-radius:22px;
+            padding:22px 20px 18px;
+            color:#fff;
+            box-shadow:0 10px 24px rgba(0,0,0,0.18);
+            page-break-inside:avoid;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+          }
+
+          .topo-etiqueta{
+            width:100%;
+            background:linear-gradient(90deg, #03143d 0%, #132b63 100%);
+            border-radius:12px;
+            padding:10px 12px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            margin-bottom:22px;
+          }
+
+          .id-label{
+            color:#1fb6ff;
+            font-weight:900;
+            font-size:16px;
+            letter-spacing:0.3px;
+          }
+
+          .id-valor{
+            color:#ffffff;
+            font-weight:900;
+            font-size:28px;
+            line-height:1;
+          }
+
+          .qr-box{
+            width:202px;
+            height:202px;
+            background:#ffffff;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:14px;
+            margin-bottom:26px;
+          }
+
+          .qr-box img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+          }
+
+          .rodape{
+            margin-top:auto;
+            width:100%;
+            border-top:1px solid rgba(59,130,246,0.22);
+            padding-top:10px;
+            text-align:left;
+            color:#94a3b8;
+            font-size:13px;
+          }
+
+          @media print{
+            body{
+              background:#ffffff;
+              padding:12mm;
+            }
+
+            .topo{
+              display:none;
+            }
+
+            .pagina{
+              grid-template-columns:repeat(2, 280px);
+              gap:18px 24px;
+            }
+
+            .etiqueta{
+              box-shadow:none;
+              break-inside:avoid;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="topo">
+          <h1>Todos os QR Codes</h1>
+          <button onclick="window.print()">Imprimir</button>
+        </div>
+
+        <div class="pagina">
+    `;
+
+    data.forEach(m => {
+      const url = `${location.origin}/manutencao-academia/maquina.html?id=${encodeURIComponent(m.maquina_id)}`;
+      const qr = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`;
+
+      html += `
+        <div class="etiqueta">
+          <div class="topo-etiqueta">
+            <div class="id-label">ID</div>
+            <div class="id-valor">${m.maquina_id}</div>
+          </div>
+
+          <div class="qr-box">
+            <img src="${qr}" alt="QR Code">
+          </div>
+
+          <div class="rodape">Escaneie para reportar problemas</div>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </body>
+      </html>
+    `;
+
+    const novaJanela = window.open("", "_blank");
+    novaJanela.document.open();
+    novaJanela.document.write(html);
+    novaJanela.document.close();
   }
 
-  async function iniciarPagina(){
-    await carregarNomeMaquina();
-    await verificarProblemasEmAberto();
-  }
+  document.getElementById("busca").addEventListener("input", render);
 
-  iniciarPagina();
+  carregar();
 </script>
 
 </body>
