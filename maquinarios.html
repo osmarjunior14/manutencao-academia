@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maquinários - DUO</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body{
+      font-family:Arial;
+      background:#0f172a;
+      color:white;
+      padding:20px;
+    }
+
+    h1{
+      margin-bottom:20px;
+    }
+
+    .bloco{
+      background:#1e293b;
+      padding:20px;
+      border-radius:12px;
+      margin-bottom:20px;
+    }
+
+    .linha{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:8px 0;
+      border-bottom:1px solid #334155;
+    }
+
+    button{
+      padding:6px 10px;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+    }
+
+    .btn-add{
+      margin-bottom:10px;
+      background:#22c55e;
+      color:white;
+    }
+
+    .btn-qr{
+      background:#3b82f6;
+      color:white;
+    }
+
+    .form{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+    }
+
+    input, select{
+      padding:8px;
+      border-radius:6px;
+      border:none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📋 Maquinários</h1>
+
+<button class="btn-add" onclick="abrirForm()">+ Adicionar Maquinário</button>
+
+<div class="form" id="form" style="display:none;">
+  <select id="unidade">
+    <option value="DUO HELIÓPOLIS">DUO HELIÓPOLIS</option>
+    <option value="DUO CENTRO">DUO CENTRO</option>
+  </select>
+
+  <input id="id" placeholder="ID (ex: 101 ou centro-74)">
+  <input id="nome" placeholder="Nome da máquina">
+
+  <button onclick="salvar()">Salvar</button>
+</div>
+
+<h2>🏋️ DUO HELIÓPOLIS</h2>
+<div id="heliopolis" class="bloco"></div>
+
+<h2>🏋️ DUO CENTRO</h2>
+<div id="centro" class="bloco"></div>
+
+<script>
+const supabase = window.supabase.createClient(
+  "https://chyomxetiloktyepjbtk.supabase.co",
+  "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
+);
+
+function abrirForm(){
+  document.getElementById("form").style.display = "flex";
+}
+
+async function salvar(){
+  const unidade = document.getElementById("unidade").value;
+  const id = document.getElementById("id").value;
+  const nome = document.getElementById("nome").value;
+
+  if(!id || !nome){
+    alert("Preencha tudo");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("maquinarios")
+    .insert([{ unidade, maquina_id: id, nome }]);
+
+  if(error){
+    alert("Erro ao salvar");
+    return;
+  }
+
+  location.reload();
+}
+
+function gerarQR(id){
+  const url = `${location.origin}/maquina.html?id=${id}`;
+  window.open(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`);
+}
+
+async function carregar(){
+  const { data } = await supabase
+    .from("maquinarios")
+    .select("*")
+    .order("maquina_id");
+
+  const helio = document.getElementById("heliopolis");
+  const centro = document.getElementById("centro");
+
+  helio.innerHTML = "";
+  centro.innerHTML = "";
+
+  data.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "linha";
+
+    div.innerHTML = `
+      <span>${m.maquina_id} - ${m.nome}</span>
+      <button class="btn-qr" onclick="gerarQR('${m.maquina_id}')">QR</button>
+    `;
+
+    if(m.unidade === "DUO HELIÓPOLIS"){
+      helio.appendChild(div);
+    } else {
+      centro.appendChild(div);
+    }
+  });
+}
+
+carregar();
+</script>
+
+</body>
+</html>
