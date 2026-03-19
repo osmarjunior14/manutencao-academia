@@ -490,21 +490,21 @@
   <h3 class="mb-3">Painel de Manutenções</h3>
   <p class="subtitulo-topo">Acompanhe ocorrências, tempo de resolução e status das unidades DUO em tempo real.</p>
 
-  <div id="dashboard" style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+  <div id="dashboard" class="secao-gestao" style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
     <div class="card-metrica">Total de registros: <span id="total">0</span></div>
     <div class="card-metrica">Em aberto: <span id="abertos">0</span></div>
     <div class="card-metrica">Resolvidos: <span id="resolvidos">0</span></div>
     <div class="card-metrica">Tempo médio de resolução: <span id="tempoMedio">0h</span></div>
   </div>
 
-  <div class="card shadow mb-3">
+  <div class="card shadow mb-3 secao-operacional">
     <div class="card-body text-center">
       <h5>Problemas em aberto</h5>
       <h1 id="contador">0</h1>
     </div>
   </div>
 
-  <div class="linha-filtros">
+  <div class="linha-filtros secao-operacional">
     <input
       class="form-control"
       placeholder="Filtrar máquina, tipo ou descrição..."
@@ -518,7 +518,7 @@
     </select>
   </div>
 
-  <div class="card-dashboard" style="margin-bottom:20px;">
+  <div class="card-dashboard secao-operacional" style="margin-bottom:20px;">
     <h5>🔎 Buscar maquinário</h5>
 
     <input
@@ -530,7 +530,7 @@
     <div id="listaMaquinasRapida" class="lista-maquinas-rapida"></div>
   </div>
 
-  <div class="grid-dashboards">
+  <div class="grid-dashboards secao-gestao">
     <div class="card-dashboard">
       <h5 class="mb-3">📊 Tipos de problema mais frequentes</h5>
       <div id="rankingProblemas"></div>
@@ -542,13 +542,13 @@
     </div>
   </div>
 
-  <h5>🔴 Manutenções em aberto</h5>
-  <div id="listaAbertos"></div>
+  <h5 class="secao-operacional">🔴 Manutenções em aberto</h5>
+  <div id="listaAbertos" class="secao-operacional"></div>
 
-  <hr>
+  <hr class="secao-operacional">
 
-  <h5>✅ Histórico de manutenções resolvidas</h5>
-  <div id="listaResolvidos"></div>
+  <h5 class="secao-operacional">✅ Histórico de manutenções resolvidas</h5>
+  <div id="listaResolvidos" class="secao-operacional"></div>
 
 </div>
 
@@ -603,6 +603,9 @@
   const senhaAdmin = "7c9446a1";
   const senhaResolver = "oud4123";
 
+  const paramsUrl = new URLSearchParams(window.location.search);
+  const modoPainel = paramsUrl.get("modo") || "operacional";
+  
   const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
   const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -667,6 +670,20 @@
     });
 
     render();
+    aplicarModoPainel();
+  }
+
+  function aplicarModoPainel(){
+    const secoesOperacionais = document.querySelectorAll(".secao-operacional");
+    const secoesGestao = document.querySelectorAll(".secao-gestao");
+
+    if(modoPainel === "gestao"){
+      secoesGestao.forEach(el => el.style.display = "");
+      secoesOperacionais.forEach(el => el.style.display = "none");
+    } else {
+      secoesOperacionais.forEach(el => el.style.display = "");
+      secoesGestao.forEach(el => el.style.display = "none");
+    }
   }
 
   function formatarTipoProblema(valor){
@@ -1201,7 +1218,10 @@
 
   document.getElementById("filtro").addEventListener("input", render);
   document.getElementById("filtroUnidade").addEventListener("change", render);
-  document.getElementById("buscaMaquina").addEventListener("input", render);
+  document.getElementById("buscaMaquina").addEventListener("input", () => {
+    const dadosFiltrados = obterDadosFiltrados();
+    renderBuscaMaquinas(dadosFiltrados);
+  });
 
   carregar();
 
