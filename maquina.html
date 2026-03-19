@@ -204,6 +204,75 @@
       line-height:1.4;
     }
 
+    .alerta-problemas{
+      display:none;
+      margin-bottom:18px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255, 193, 7, 0.14);
+      border:1px solid rgba(255, 193, 7, 0.28);
+      color:#ffe08a;
+    }
+
+    .alerta-problemas strong{
+      display:block;
+      font-size:15px;
+      margin-bottom:8px;
+      color:#ffd45c;
+    }
+
+    .alerta-problemas p{
+      font-size:14px;
+      line-height:1.45;
+      color:#fff3c4;
+      margin-bottom:10px;
+    }
+
+    .alerta-problemas ul{
+      margin-left:18px;
+      margin-bottom:14px;
+    }
+
+    .alerta-problemas li{
+      margin-bottom:6px;
+      line-height:1.4;
+      color:#fff7d6;
+    }
+
+    .alerta-acoes{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .alerta-botao{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:14px 16px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .12s ease, filter .12s ease;
+    }
+
+    .alerta-botao:active{
+      transform:scale(0.985);
+      filter:brightness(0.98);
+    }
+
+    .alerta-botao.continuar{
+      background:linear-gradient(135deg, #31d66b 0%, #22c55e 100%);
+      color:#ffffff;
+      box-shadow:0 12px 24px rgba(34,197,94,0.18);
+    }
+
+    .alerta-botao.cancelar{
+      background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color:#ffffff;
+      box-shadow:0 12px 24px rgba(239,68,68,0.18);
+    }
+
     @media (max-width: 430px){
       .card{
         border-radius:24px;
@@ -240,48 +309,65 @@
       <div class="machine-name" id="maquina"></div>
     </div>
 
-    <div class="form-group">
-      <label class="field-label" for="tipoProblema">Tipo de problema</label>
+    <div id="alertaProblemas" class="alerta-problemas">
+      <strong>⚠️ Esta máquina já possui problemas em aberto</strong>
+      <p>Confira abaixo. Caso seja um problema diferente, você pode registrar normalmente.</p>
+      <ul id="listaProblemas"></ul>
 
-      <select id="tipoProblema" class="select-field" onchange="alternarOutro()">
-        <option value="">Selecione o problema</option>
-        <option value="barulho_anormal">Barulho anormal</option>
-        <option value="cabo_rompido">Cabo rompido</option>
-        <option value="choque_eletrico">Choque elétrico</option>
-        <option value="corrente_ou_correia_com_defeito">Corrente/correia com defeito</option>
-        <option value="equipamento_travando">Equipamento travando</option>
-        <option value="estrutura_solta">Estrutura solta</option>
-        <option value="estofado_rasgado">Estofado rasgado</option>
-        <option value="lubrificacao_necessaria">Lubrificação necessária</option>
-        <option value="painel_ou_display_com_defeito">Painel/display com defeito</option>
-        <option value="parafuso_frouxo">Parafuso frouxo</option>
-        <option value="pino_de_ajuste_quebrado">Pino de ajuste quebrado</option>
-        <option value="polia_com_defeito">Polia com defeito</option>
-        <option value="regulagem_com_defeito">Regulagem com defeito</option>
-        <option value="sem_adesivo_de_pesos">Sem adesivo de pesos</option>
-        <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
-        <option value="sem_estofado">Sem estofado</option>
-        <option value="outro">Outro</option>
-      </select>
-    </div>
-
-    <div class="form-group" id="outroBox" style="display:none;">
-      <label class="field-label" for="outroProblema">Descreva o problema</label>
-      <textarea
-        id="outroProblema"
-        maxlength="200"
-        placeholder="Descreva o problema..."
-      ></textarea>
-
-      <div class="helper">
-        <span>Máximo de 200 caracteres</span>
-        <span id="contadorCaracteres">0/200</span>
+      <div class="alerta-acoes">
+        <button class="alerta-botao continuar" onclick="continuarRegistro()">
+          Registrar um problema diferente
+        </button>
+        <button class="alerta-botao cancelar" onclick="cancelarRegistro()">
+          Não registrar
+        </button>
       </div>
     </div>
 
-    <button class="button" id="botaoRegistrar" onclick="registrar()">
-      Registrar
-    </button>
+    <div id="formulario">
+      <div class="form-group">
+        <label class="field-label" for="tipoProblema">Tipo de problema</label>
+
+        <select id="tipoProblema" class="select-field" onchange="alternarOutro()">
+          <option value="">Selecione o problema</option>
+          <option value="barulho_anormal">Barulho anormal</option>
+          <option value="cabo_rompido">Cabo rompido</option>
+          <option value="choque_eletrico">Choque elétrico</option>
+          <option value="corrente_ou_correia_com_defeito">Corrente/correia com defeito</option>
+          <option value="equipamento_travando">Equipamento travando</option>
+          <option value="estrutura_solta">Estrutura solta</option>
+          <option value="estofado_rasgado">Estofado rasgado</option>
+          <option value="lubrificacao_necessaria">Lubrificação necessária</option>
+          <option value="painel_ou_display_com_defeito">Painel/display com defeito</option>
+          <option value="parafuso_frouxo">Parafuso frouxo</option>
+          <option value="pino_de_ajuste_quebrado">Pino de ajuste quebrado</option>
+          <option value="polia_com_defeito">Polia com defeito</option>
+          <option value="regulagem_com_defeito">Regulagem com defeito</option>
+          <option value="sem_adesivo_de_pesos">Sem adesivo de pesos</option>
+          <option value="sem_carga_ou_resistencia">Sem carga ou resistência</option>
+          <option value="sem_estofado">Sem estofado</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="outroBox" style="display:none;">
+        <label class="field-label" for="outroProblema">Descreva o problema</label>
+        <textarea
+          id="outroProblema"
+          maxlength="200"
+          placeholder="Descreva o problema..."
+        ></textarea>
+
+        <div class="helper">
+          <span>Máximo de 200 caracteres</span>
+          <span id="contadorCaracteres">0/200</span>
+        </div>
+      </div>
+
+      <button class="button" id="botaoRegistrar" onclick="registrar()">
+        Registrar
+      </button>
+    </div>
 
     <div id="msg" class="message"></div>
 
@@ -512,6 +598,9 @@
   const contadorEl = document.getElementById("contadorCaracteres");
   const msgEl = document.getElementById("msg");
   const botaoEl = document.getElementById("botaoRegistrar");
+  const alertaProblemasEl = document.getElementById("alertaProblemas");
+  const listaProblemasEl = document.getElementById("listaProblemas");
+  const formularioEl = document.getElementById("formulario");
 
   outroProblemaEl.addEventListener("input", () => {
     contadorEl.textContent = `${outroProblemaEl.value.length}/200`;
@@ -533,6 +622,63 @@
   function mostrarMensagem(tipo, texto){
     msgEl.className = `message ${tipo}`;
     msgEl.textContent = texto;
+  }
+
+  function continuarRegistro(){
+    alertaProblemasEl.style.display = "none";
+    formularioEl.style.display = "block";
+  }
+
+  function cancelarRegistro(){
+    formularioEl.style.display = "none";
+    mostrarMensagem("success", "Ok. Nenhum novo problema foi registrado.");
+  }
+
+  async function verificarProblemasEmAberto(){
+    if(!maquinaId){
+      formularioEl.style.display = "none";
+      mostrarMensagem("error", "ID da máquina não encontrado na URL.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabaseClient
+        .from("manutencao_academia")
+        .select("tipo_problema, descricao, status")
+        .eq("maquina_id", maquinaId)
+        .eq("status", "aberto");
+
+      if(error){
+        throw error;
+      }
+
+      listaProblemasEl.innerHTML = "";
+
+      if(data && data.length > 0){
+        data.forEach(item => {
+          const li = document.createElement("li");
+
+          let texto = tipoProblemaMap[item.tipo_problema] || item.tipo_problema || "Problema em aberto";
+
+          if(item.tipo_problema === "outro" && item.descricao){
+            texto = item.descricao;
+          }
+
+          li.textContent = texto;
+          listaProblemasEl.appendChild(li);
+        });
+
+        alertaProblemasEl.style.display = "block";
+        formularioEl.style.display = "none";
+      } else {
+        alertaProblemasEl.style.display = "none";
+        formularioEl.style.display = "block";
+      }
+    } catch (error) {
+      console.log("Erro ao verificar problemas em aberto:", error);
+      alertaProblemasEl.style.display = "none";
+      formularioEl.style.display = "block";
+    }
   }
 
   async function registrar(){
@@ -603,6 +749,8 @@
       document.getElementById("outroBox").style.display = "none";
       contadorEl.textContent = "0/200";
 
+      await verificarProblemasEmAberto();
+
     } catch (error) {
       mostrarMensagem("error", "Erro ao registrar manutenção. Tente novamente.");
       console.log("Erro ao registrar:", error);
@@ -611,6 +759,8 @@
       botaoEl.textContent = "Registrar";
     }
   }
+
+  verificarProblemasEmAberto();
 </script>
 
 </body>
