@@ -605,7 +605,15 @@
 
   const paramsUrl = new URLSearchParams(window.location.search);
   const modoPainel = paramsUrl.get("modo") || "operacional";
-  
+
+  // 🔒 Proteção do modo gestão
+if(modoPainel === "gestao"){
+  const acessoLiberado = localStorage.getItem("duo_gestao_logado");
+
+  if(acessoLiberado !== "sim"){
+    window.location.href = "./login.html";
+  }
+} 
   const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
   const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
