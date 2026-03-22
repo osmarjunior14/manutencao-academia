@@ -844,32 +844,50 @@ if(modoPainel === "gestao"){
   }
 
   function formatarDataBonita(dataIso){
-    const data = new Date(dataIso);
-    const agora = new Date();
+  const data = new Date(dataIso);
+  const agora = new Date();
 
-    const mesmaData =
-      data.getDate() === agora.getDate() &&
-      data.getMonth() === agora.getMonth() &&
-      data.getFullYear() === agora.getFullYear();
+  const dataSP = new Date(
+    data.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+  );
 
-    const ontem = new Date();
-    ontem.setDate(agora.getDate() - 1);
+  const agoraSP = new Date(
+    agora.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+  );
 
-    const ehOntem =
-      data.getDate() === ontem.getDate() &&
-      data.getMonth() === ontem.getMonth() &&
-      data.getFullYear() === ontem.getFullYear();
+  const mesmaData =
+    dataSP.getDate() === agoraSP.getDate() &&
+    dataSP.getMonth() === agoraSP.getMonth() &&
+    dataSP.getFullYear() === agoraSP.getFullYear();
 
-    if(mesmaData){
-      return `Hoje às ${data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
-    }
+  const ontemSP = new Date(agoraSP);
+  ontemSP.setDate(agoraSP.getDate() - 1);
 
-    if(ehOntem){
-      return `Ontem às ${data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
-    }
+  const ehOntem =
+    dataSP.getDate() === ontemSP.getDate() &&
+    dataSP.getMonth() === ontemSP.getMonth() &&
+    dataSP.getFullYear() === ontemSP.getFullYear();
 
-    return data.toLocaleString("pt-BR");
+  if(mesmaData){
+    return `Hoje às ${data.toLocaleTimeString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      minute: "2-digit"
+    })}`;
   }
+
+  if(ehOntem){
+    return `Ontem às ${data.toLocaleTimeString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      minute: "2-digit"
+    })}`;
+  }
+
+  return data.toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo"
+  });
+}
 
   function contarOcorrenciasMaquina(maquinaId){
     return manutencoes.filter(item => String(item.maquina_id) === String(maquinaId)).length;
