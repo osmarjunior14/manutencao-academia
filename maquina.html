@@ -601,20 +601,27 @@
       }
 
       try {
-        await fetch("https://chyomxetiloktyepjbtk.supabase.co/functions/v1/super-function", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            maquina: nomeMaquina + " - " + maquinaId,
-            descricao: textoTelegram,
-            data: new Date().toLocaleString("pt-BR", {
-  timeZone: "America/Sao_Paulo"
-  })
-      } catch (erroTelegram) {
-        console.log("Erro ao enviar notificação Telegram:", erroTelegram);
-      }
+  const resposta = await fetch("https://chyomxetiloktyepjbtk.supabase.co/functions/v1/super-function", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      maquina: nomeMaquina + " - " + maquinaId,
+      descricao: textoTelegram,
+      data: new Date().toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo"
+      })
+    })
+  });
+
+  if (!resposta.ok) {
+    throw new Error("Erro na resposta do servidor");
+  }
+
+} catch (erroTelegram) {
+  console.log("Erro ao enviar notificação Telegram:", erroTelegram);
+}
 
       mostrarMensagem("success", "✅ Problema registrado com sucesso.");
       tipoProblemaEl.value = "";
