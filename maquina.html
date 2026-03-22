@@ -609,9 +609,9 @@
           body: JSON.stringify({
             maquina: nomeMaquina + " - " + maquinaId,
             descricao: textoTelegram,
-            data: new Date().toLocaleString("pt-BR")
-          })
-        });
+            data: new Date().toLocaleString("pt-BR", {
+  timeZone: "America/Sao_Paulo"
+  })
       } catch (erroTelegram) {
         console.log("Erro ao enviar notificação Telegram:", erroTelegram);
       }
