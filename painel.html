@@ -845,43 +845,32 @@ if(modoPainel === "gestao"){
 
   function formatarDataBonita(dataIso){
   const data = new Date(dataIso);
+
   const agora = new Date();
 
-  const dataSP = new Date(
-    data.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
-  );
-
-  const agoraSP = new Date(
-    agora.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
-  );
-
   const mesmaData =
-    dataSP.getDate() === agoraSP.getDate() &&
-    dataSP.getMonth() === agoraSP.getMonth() &&
-    dataSP.getFullYear() === agoraSP.getFullYear();
+    data.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) ===
+    agora.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
-  const ontemSP = new Date(agoraSP);
-  ontemSP.setDate(agoraSP.getDate() - 1);
+  const ontem = new Date();
+  ontem.setDate(agora.getDate() - 1);
 
   const ehOntem =
-    dataSP.getDate() === ontemSP.getDate() &&
-    dataSP.getMonth() === ontemSP.getMonth() &&
-    dataSP.getFullYear() === ontemSP.getFullYear();
+    data.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) ===
+    ontem.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+
+  const hora = data.toLocaleTimeString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
   if(mesmaData){
-    return `Hoje às ${data.toLocaleTimeString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      hour: "2-digit",
-      minute: "2-digit"
-    })}`;
+    return `Hoje às ${hora}`;
   }
 
   if(ehOntem){
-    return `Ontem às ${data.toLocaleTimeString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      hour: "2-digit",
-      minute: "2-digit"
-    })}`;
+    return `Ontem às ${hora}`;
   }
 
   return data.toLocaleString("pt-BR", {
