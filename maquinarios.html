@@ -452,6 +452,26 @@
       text-align:right;
     }
 
+    .nome-maquina{
+      width:100%;
+      height:1.2cm;
+      margin-bottom:0.18cm;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#ffffff;
+      font-weight:800;
+      line-height:1.1;
+      font-size:15px;
+      overflow:hidden;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      word-break:break-word;
+      hyphens:auto;
+    }
+
     .qr-box{
       width:100%;
       flex:1;
@@ -551,6 +571,8 @@
         <div class="id-valor">${String(m.maquina_id || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
       </div>
 
+      <div class="nome-maquina">${String(m.nome || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+
       <div class="qr-box">
         <div class="qr" data-url="${url}"></div>
       </div>
@@ -582,6 +604,23 @@
           width: 170,
           height: 170
         });
+      });
+    }
+
+    function ajustarNomes(){
+      const nomes = document.querySelectorAll(".nome-maquina");
+
+      nomes.forEach(el => {
+        let tamanho = 15;
+        el.style.fontSize = tamanho + "px";
+
+        while (
+          tamanho > 9 &&
+          (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth)
+        ) {
+          tamanho--;
+          el.style.fontSize = tamanho + "px";
+        }
       });
     }
 
@@ -629,6 +668,7 @@
     }
 
     gerarQRs();
+    ajustarNomes();
   <\/script>
 </body>
 </html>
