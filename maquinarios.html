@@ -50,6 +50,13 @@
       word-break:break-word;
     }
 
+    .maquina-click{
+      cursor:pointer;
+      font-weight:bold;
+      text-decoration:underline;
+      text-underline-offset:3px;
+    }
+
     .status-maquina{
       margin-top:6px;
       font-size:13px;
@@ -141,6 +148,105 @@
       font-style:italic;
     }
 
+    .modal-overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.65);
+      z-index:9999;
+      padding:20px;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .modal{
+      width:100%;
+      max-width:760px;
+      max-height:85vh;
+      overflow:auto;
+      background:#111827;
+      border-radius:14px;
+      padding:20px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    .modal-topo{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .modal-topo h3{
+      margin:0;
+      font-size:24px;
+    }
+
+    .modal-topo p{
+      margin:6px 0 0 0;
+      color:#94a3b8;
+      font-size:14px;
+    }
+
+    .btn-fechar{
+      background:#374151;
+      color:white;
+      flex-shrink:0;
+    }
+
+    .historico-card{
+      background:#1f2937;
+      border:1px solid #374151;
+      border-radius:12px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .historico-linha-topo{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:8px;
+      flex-wrap:wrap;
+    }
+
+    .historico-tipo{
+      font-weight:bold;
+      font-size:15px;
+    }
+
+    .badge-status{
+      font-size:12px;
+      font-weight:bold;
+      padding:5px 10px;
+      border-radius:999px;
+      display:inline-block;
+    }
+
+    .badge-aberto{
+      background:#7f1d1d;
+      color:#fecaca;
+    }
+
+    .badge-resolvido{
+      background:#14532d;
+      color:#bbf7d0;
+    }
+
+    .historico-desc{
+      color:#e5e7eb;
+      margin:8px 0;
+      white-space:pre-wrap;
+    }
+
+    .historico-meta{
+      color:#9ca3af;
+      font-size:13px;
+      line-height:1.5;
+    }
+
     @media (max-width: 700px){
       .linha{
         flex-direction:column;
@@ -157,6 +263,10 @@
 
       .btn-geral{
         margin-left:0;
+      }
+
+      .modal{
+        padding:16px;
       }
     }
   </style>
@@ -198,6 +308,20 @@
 <h2>🏋️ DUO CENTRO</h2>
 <div id="centro" class="bloco"></div>
 
+<div id="modalHistoricoOverlay" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-topo">
+      <div>
+        <h3 id="tituloHistorico">Histórico da máquina</h3>
+        <p>Clique fora ou no botão para fechar.</p>
+      </div>
+      <button class="btn-fechar" onclick="fecharHistorico()">Fechar</button>
+    </div>
+
+    <div id="conteudoHistorico"></div>
+  </div>
+</div>
+
 <script>
   const supabaseClient = window.supabase.createClient(
     "https://chyomxetiloktyepjbtk.supabase.co",
@@ -205,6 +329,41 @@
   );
 
   const senhaAdmin = "7c9446a1";
+
+  const tipoProblemaMap = {
+    "barulho_anormal":"Barulho anormal",
+    "cabo_rompido":"Cabo rompido",
+    "choque_eletrico":"Choque elétrico",
+    "corrente_ou_correia_com_defeito":"Corrente/correia com defeito",
+    "equipamento_travando":"Equipamento travando",
+    "estrutura_solta":"Estrutura solta",
+    "estofado_rasgado":"Estofado rasgado",
+    "lubrificacao_necessaria":"Lubrificação necessária",
+    "painel_ou_display_com_defeito":"Painel/display com defeito",
+    "parafuso_frouxo":"Parafuso frouxo",
+    "pino_de_ajuste_quebrado":"Pino de ajuste quebrado",
+    "polia_com_defeito":"Polia com defeito",
+    "regulagem_com_defeito":"Regulagem com defeito",
+    "sem_adesivo_de_pesos":"Sem adesivo de pesos",
+    "sem_carga_ou_resistencia":"Sem carga ou resistência",
+    "sem_estofado":"Sem estofado",
+    "outro":"Outro"
+  };
+
+  function formatarTipoProblema(valor){
+    return tipoProblemaMap[valor] || valor || "Problema";
+  }
+
+  function formatarDataHora(dataIso){
+    if(!dataIso) return "-";
+    try{
+      return new Date(dataIso).toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo"
+      });
+    } catch {
+      return dataIso;
+    }
+  }
 
   function abrirForm(){
     const form = document.getElementById("form");
@@ -357,6 +516,74 @@
     carregar();
   }
 
+  async function abrirHistorico(maquinaId, nomeMaquina){
+    const overlay = document.getElementById("modalHistoricoOverlay");
+    const titulo = document.getElementById("tituloHistorico");
+    const conteudo = document.getElementById("conteudoHistorico");
+
+    titulo.textContent = `${maquinaId} - ${nomeMaquina}`;
+    conteudo.innerHTML = `<div class="vazio">Carregando histórico...</div>`;
+    overlay.style.display = "flex";
+
+    const { data, error } = await supabaseClient
+      .from("manutencao_academia")
+      .select("*")
+      .eq("maquina_id", maquinaId)
+      .order("data", { ascending: false });
+
+    if(error){
+      console.log("Erro ao buscar histórico:", error);
+      conteudo.innerHTML = `<div class="vazio">Erro ao carregar histórico.</div>`;
+      return;
+    }
+
+    if(!data || data.length === 0){
+      conteudo.innerHTML = `<div class="vazio">Nenhum histórico encontrado para essa máquina.</div>`;
+      return;
+    }
+
+    conteudo.innerHTML = data.map(item => {
+      const status = String(item.status || "").toLowerCase() === "resolvido"
+        ? `<span class="badge-status badge-resolvido">RESOLVIDO</span>`
+        : `<span class="badge-status badge-aberto">ABERTO</span>`;
+
+      const descricao = item.descricao
+        ? `<div class="historico-desc">${item.descricao}</div>`
+        : "";
+
+      const resolvidoEm = item.data_resolucao
+        ? `<div><strong>Resolvido em:</strong> ${formatarDataHora(item.data_resolucao)}</div>`
+        : "";
+
+      return `
+        <div class="historico-card">
+          <div class="historico-linha-topo">
+            <div class="historico-tipo">${formatarTipoProblema(item.tipo_problema)}</div>
+            <div>${status}</div>
+          </div>
+
+          ${descricao}
+
+          <div class="historico-meta">
+            <div><strong>Registrado em:</strong> ${formatarDataHora(item.data)}</div>
+            ${resolvidoEm}
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function fecharHistorico(){
+    document.getElementById("modalHistoricoOverlay").style.display = "none";
+    document.getElementById("conteudoHistorico").innerHTML = "";
+  }
+
+  document.getElementById("modalHistoricoOverlay").addEventListener("click", function(e){
+    if(e.target.id === "modalHistoricoOverlay"){
+      fecharHistorico();
+    }
+  });
+
   async function carregar(){
     const [maquinariosResp, manutencoesResp] = await Promise.all([
       supabaseClient
@@ -411,18 +638,21 @@
           ? `<div class="status-maquina alerta">🔴 ${quantidadeAbertos} em aberto</div>`
           : `<div class="status-maquina ok">🟢 OK</div>`;
 
+        const maquinaIdSeguro = String(m.maquina_id).replace(/'/g, "\\'");
+        const nomeSeguro = String(m.nome).replace(/'/g, "\\'");
+
         const div = document.createElement("div");
         div.className = "linha";
 
         div.innerHTML = `
           <div class="info">
-            <div>${m.maquina_id} - ${m.nome}</div>
+            <div class="maquina-click" onclick="abrirHistorico('${maquinaIdSeguro}', '${nomeSeguro}')">${m.maquina_id} - ${m.nome}</div>
             ${statusHtml}
           </div>
           <div class="acoes">
-            <button class="btn-qr" onclick="gerarQR('${String(m.maquina_id).replace(/'/g, "\\'")}')">QR</button>
-            <button class="btn-editar" onclick="editarMaquinario('${String(m.maquina_id).replace(/'/g, "\\'")}')">Editar</button>
-            <button class="btn-apagar" onclick="apagarMaquinario('${String(m.maquina_id).replace(/'/g, "\\'")}')">Apagar</button>
+            <button class="btn-qr" onclick="gerarQR('${maquinaIdSeguro}')">QR</button>
+            <button class="btn-editar" onclick="editarMaquinario('${maquinaIdSeguro}')">Editar</button>
+            <button class="btn-apagar" onclick="apagarMaquinario('${maquinaIdSeguro}')">Apagar</button>
           </div>
         `;
 
@@ -439,18 +669,21 @@
           ? `<div class="status-maquina alerta">🔴 ${quantidadeAbertos} em aberto</div>`
           : `<div class="status-maquina ok">🟢 OK</div>`;
 
+        const maquinaIdSeguro = String(m.maquina_id).replace(/'/g, "\\'");
+        const nomeSeguro = String(m.nome).replace(/'/g, "\\'");
+
         const div = document.createElement("div");
         div.className = "linha";
 
         div.innerHTML = `
           <div class="info">
-            <div>${m.maquina_id} - ${m.nome}</div>
+            <div class="maquina-click" onclick="abrirHistorico('${maquinaIdSeguro}', '${nomeSeguro}')">${m.maquina_id} - ${m.nome}</div>
             ${statusHtml}
           </div>
           <div class="acoes">
-            <button class="btn-qr" onclick="gerarQR('${String(m.maquina_id).replace(/'/g, "\\'")}')">QR</button>
-            <button class="btn-editar" onclick="editarMaquinario('${String(m.maquina_id).replace(/'/g, "\\'")}')">Editar</button>
-            <button class="btn-apagar" onclick="apagarMaquinario('${String(m.maquina_id).replace(/'/g, "\\'")}')">Apagar</button>
+            <button class="btn-qr" onclick="gerarQR('${maquinaIdSeguro}')">QR</button>
+            <button class="btn-editar" onclick="editarMaquinario('${maquinaIdSeguro}')">Editar</button>
+            <button class="btn-apagar" onclick="apagarMaquinario('${maquinaIdSeguro}')">Apagar</button>
           </div>
         `;
 
@@ -674,7 +907,7 @@
       border-top:1px solid rgba(59,130,246,0.22);
       padding-top:0.18cm;
       text-align:left;
-      color:#94a3b8;
+      color:#94a3af;
       font-size:11px;
     }
 
