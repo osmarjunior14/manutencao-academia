@@ -383,11 +383,21 @@
           }
 
           .pagina{
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
-            gap:28px 32px;
-            justify-content:center;
-          }
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:20px;
+  justify-content:center;
+}
+
+.etiqueta{
+  width:100%;
+  height:380px; /* altura fixa */
+}
+
+/* 🔥 ESSENCIAL PRA QUEBRA CORRETA */
+.pagina > .etiqueta:nth-child(6n){
+  page-break-after: always;
+}
 
           .etiqueta{
             width:100%;
@@ -481,30 +491,36 @@
           }
 
           @media print{
-            @page{
-              size:A4 landscape;
-              margin:10mm;
-            }
 
-            body{
-              background:#ffffff;
-              padding:0;
-            }
+  @page{
+    size:A4 landscape;
+    margin:10mm;
+  }
 
-            .topo{
-              display:none;
-            }
+  body{
+    background:#ffffff;
+    padding:0;
+  }
 
-            .pagina{
-              grid-template-columns:repeat(4, 1fr);
-              gap:20px;
-            }
+  .topo{
+    display:none;
+  }
 
-            .etiqueta{
-              width:100%;
-              box-shadow:none;
-            }
-          }
+  .pagina{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    grid-template-rows:repeat(2, auto);
+    gap:15px;
+  }
+
+  .etiqueta{
+    height:380px;
+    box-shadow:none;
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+
+}
         </style>
       </head>
       <body>
