@@ -306,320 +306,302 @@
     }
   }
 
-    <script>
-async function gerarTodosQRCodes(){
-  const { data, error } = await supabaseClient
-    .from("maquinarios")
-    .select("*")
-    .order("unidade")
-    .order("nome");
+  async function gerarTodosQRCodes(){
+    const { data, error } = await supabaseClient
+      .from("maquinarios")
+      .select("*")
+      .order("unidade")
+      .order("nome");
 
-  if(error){
-    alert("Erro ao carregar maquinários para gerar os QR Codes.");
-    console.log(error);
-    return;
-  }
+    if(error){
+      alert("Erro ao carregar maquinários para gerar os QR Codes.");
+      console.log(error);
+      return;
+    }
 
-  let html = `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Todos os QR Codes</title>
+    let html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Todos os QR Codes</title>
 
-      <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
-      <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"><\/script>
-      <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"><\/script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"><\/script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"><\/script>
 
-      <style>
-        *{
-          box-sizing:border-box;
-        }
+  <style>
+    *{
+      box-sizing:border-box;
+    }
 
-        body{
-          margin:0;
-          padding:24px;
-          background:#e9e9e9;
-          font-family:Arial, sans-serif;
-        }
+    body{
+      margin:0;
+      padding:24px;
+      background:#e9e9e9;
+      font-family:Arial, sans-serif;
+    }
 
-        .topo{
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          gap:12px;
-          margin-bottom:24px;
-          flex-wrap:wrap;
-        }
+    .topo{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:24px;
+      flex-wrap:wrap;
+    }
 
-        .topo h1{
-          margin:0;
-          font-size:28px;
-          color:#111827;
-        }
+    .topo h1{
+      margin:0;
+      font-size:28px;
+      color:#111827;
+    }
 
-        .topo-botoes{
-          display:flex;
-          gap:10px;
-          flex-wrap:wrap;
-        }
+    .topo-botoes{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
 
-        .topo button{
-          padding:12px 18px;
-          border:none;
-          border-radius:10px;
-          color:#fff;
-          font-size:16px;
-          font-weight:bold;
-          cursor:pointer;
-        }
+    .topo button{
+      padding:12px 18px;
+      border:none;
+      border-radius:10px;
+      color:#fff;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    }
 
-        .btn-imprimir{
-          background:#2563eb;
-        }
+    .btn-imprimir{
+      background:#2563eb;
+    }
 
-        .btn-pdf{
-          background:#16a34a;
-        }
+    .btn-pdf{
+      background:#16a34a;
+    }
 
-        .pagina{
-          display:grid;
-          grid-template-columns:repeat(2, 10cm);
-          gap:22px 22px;
-          justify-content:center;
-        }
+    .pagina{
+      display:grid;
+      grid-template-columns:repeat(2, 10cm);
+      gap:22px 22px;
+      justify-content:center;
+    }
 
-        .etiqueta{
-          width:10cm;
-          height:10cm;
-          background:linear-gradient(180deg, #020817 0%, #010b1f 100%);
-          border-radius:22px;
-          padding:16px 16px 14px;
-          color:#fff;
-          box-shadow:0 10px 24px rgba(0,0,0,0.18);
-          page-break-inside:avoid;
-          break-inside:avoid;
-          display:flex;
-          flex-direction:column;
-          align-items:center;
-          overflow:hidden;
-        }
+    .etiqueta{
+      width:10cm;
+      height:10cm;
+      background:linear-gradient(180deg, #020817 0%, #010b1f 100%);
+      border-radius:22px;
+      padding:16px 16px 14px;
+      color:#fff;
+      box-shadow:0 10px 24px rgba(0,0,0,0.18);
+      page-break-inside:avoid;
+      break-inside:avoid;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      overflow:hidden;
+    }
 
-        .topo-etiqueta{
-          width:100%;
-          background:linear-gradient(90deg, #03143d 0%, #132b63 100%);
-          border-radius:12px;
-          padding:10px 12px;
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          margin-bottom:20px;
-        }
+    .topo-etiqueta{
+      width:100%;
+      background:linear-gradient(90deg, #03143d 0%, #132b63 100%);
+      border-radius:12px;
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:20px;
+    }
 
-        .id-label{
-          color:#1fb6ff;
-          font-weight:900;
-          font-size:16px;
-          letter-spacing:0.3px;
-        }
+    .id-label{
+      color:#1fb6ff;
+      font-weight:900;
+      font-size:16px;
+      letter-spacing:0.3px;
+    }
 
-        .id-valor{
-          color:#ffffff;
-          font-weight:900;
-          font-size:28px;
-          line-height:1;
-        }
+    .id-valor{
+      color:#ffffff;
+      font-weight:900;
+      font-size:28px;
+      line-height:1;
+    }
 
-        .qr-box{
-          width:100%;
-          flex:1;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          margin-bottom:18px;
-        }
+    .qr-box{
+      width:100%;
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:18px;
+    }
 
-        .qr{
-          width:5.6cm;
-          height:5.6cm;
-          background:#ffffff;
-          border-radius:12px;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          padding:10px;
-          overflow:hidden;
-        }
+    .qr{
+      width:5.6cm;
+      height:5.6cm;
+      background:#ffffff;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px;
+      overflow:hidden;
+    }
 
-        .qr img,
-        .qr canvas{
-          display:block;
-          max-width:100%;
-          max-height:100%;
-        }
+    .qr img,
+    .qr canvas{
+      display:block;
+      max-width:100%;
+      max-height:100%;
+    }
 
-        .rodape{
-          margin-top:auto;
-          width:100%;
-          border-top:1px solid rgba(59,130,246,0.22);
-          padding-top:10px;
-          text-align:left;
-          color:#94a3b8;
-          font-size:13px;
-        }
+    .rodape{
+      margin-top:auto;
+      width:100%;
+      border-top:1px solid rgba(59,130,246,0.22);
+      padding-top:10px;
+      text-align:left;
+      color:#94a3b8;
+      font-size:13px;
+    }
 
-        @media print{
-          @page{
-            size:A4 portrait;
-            margin:10mm;
-          }
+    @media print{
+      @page{
+        size:A4 portrait;
+        margin:10mm;
+      }
 
-          body{
-            background:#ffffff;
-            padding:0;
-          }
+      body{
+        background:#ffffff;
+        padding:0;
+      }
 
-          .topo{
-            display:none;
-          }
+      .topo{
+        display:none;
+      }
 
-          .pagina{
-            grid-template-columns:repeat(2, 10cm);
-            gap:18px 18px;
-            justify-content:center;
-          }
+      .pagina{
+        grid-template-columns:repeat(2, 10cm);
+        gap:18px 18px;
+        justify-content:center;
+      }
 
-          .etiqueta{
-            width:10cm;
-            height:10cm;
-            box-shadow:none;
-            page-break-inside:avoid;
-            break-inside:avoid;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="topo">
-        <h1>Todos os QR Codes</h1>
+      .etiqueta{
+        width:10cm;
+        height:10cm;
+        box-shadow:none;
+        page-break-inside:avoid;
+        break-inside:avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topo">
+    <h1>Todos os QR Codes</h1>
 
-        <div class="topo-botoes">
-          <button class="btn-pdf" onclick="baixarPDF()">Baixar PDF</button>
-          <button class="btn-imprimir" onclick="window.print()">Imprimir</button>
-        </div>
+    <div class="topo-botoes">
+      <button class="btn-pdf" onclick="baixarPDF()">Baixar PDF</button>
+      <button class="btn-imprimir" onclick="window.print()">Imprimir</button>
+    </div>
+  </div>
+
+  <div class="pagina" id="areaEtiquetas">
+`;
+
+    data.forEach(m => {
+      const url = `${location.origin}/manutencao-academia/maquina.html?id=${encodeURIComponent(m.maquina_id)}`;
+
+      html += `
+    <div class="etiqueta">
+      <div class="topo-etiqueta">
+        <div class="id-label">ID</div>
+        <div class="id-valor">${String(m.maquina_id || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
       </div>
 
-      <div class="pagina" id="areaEtiquetas">
-  `;
+      <div class="qr-box">
+        <div class="qr" data-url="${url}"></div>
+      </div>
 
-  data.forEach(m => {
-    const url = `${location.origin}/manutencao-academia/maquina.html?id=${encodeURIComponent(m.maquina_id)}`;
+      <div class="rodape">Escaneie para reportar problemas</div>
+    </div>
+`;
+    });
 
     html += `
-      <div class="etiqueta">
-        <div class="topo-etiqueta">
-          <div class="id-label">ID</div>
-          <div class="id-valor">${String(m.maquina_id || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
-        </div>
+  </div>
 
-        <div class="qr-box">
-          <div class="qr" data-url="${url}"></div>
-        </div>
+  <script>
+    function gerarQRs(){
+      const elementos = document.querySelectorAll(".qr");
 
-        <div class="rodape">Escaneie para reportar problemas</div>
-      </div>
-    `;
-  });
+      elementos.forEach(el => {
+        const url = el.getAttribute("data-url");
+        new QRCode(el, {
+          text: url,
+          width: 180,
+          height: 180
+        });
+      });
+    }
 
-  html += `
-      </div>
+    async function baixarPDF(){
+      const botao = document.querySelector(".btn-pdf");
+      const area = document.getElementById("areaEtiquetas");
 
-      <script>
-        function gerarQRs(){
-          const elementos = document.querySelectorAll(".qr");
+      try{
+        botao.disabled = true;
+        botao.textContent = "Gerando PDF...";
 
-          elementos.forEach(el => {
-            const url = el.getAttribute("data-url");
-            new QRCode(el, {
-              text: url,
-              width: 180,
-              height: 180
-            });
-          });
+        await new Promise(resolve => setTimeout(resolve, 700));
+
+        const canvas = await html2canvas(area, {
+          scale: 2,
+          backgroundColor: "#e9e9e9",
+          logging: false
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+        const { jsPDF } = window.jspdf;
+
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while(heightLeft > 0){
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pdfHeight;
         }
 
-        async function baixarPDF(){
-          const botao = document.querySelector(".btn-pdf");
-          const area = document.getElementById("areaEtiquetas");
+        pdf.save("qrcodes-maquinarios.pdf");
+      } catch(erro){
+        console.log("Erro ao gerar PDF:", erro);
+        alert("Não foi possível gerar o PDF.");
+      } finally {
+        botao.disabled = false;
+        botao.textContent = "Baixar PDF";
+      }
+    }
 
-          try{
-            botao.disabled = true;
-            botao.textContent = "Gerando PDF...";
-
-            await new Promise(resolve => setTimeout(resolve, 700));
-
-            const canvas = await html2canvas(area, {
-              scale: 2,
-              backgroundColor: "#e9e9e9",
-              logging: false
-            });
-
-            const imgData = canvas.toDataURL("image/png");
-            const { jsPDF } = window.jspdf;
-
-            const pdf = new jsPDF("p", "mm", "a4");
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-
-            const imgWidth = pdfWidth;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            let heightLeft = imgHeight;
-            let position = 0;
-
-            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-            heightLeft -= pdfHeight;
-
-            while(heightLeft > 0){
-              position = heightLeft - imgHeight;
-              pdf.addPage();
-              pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-              heightLeft -= pdfHeight;
-            }
-
-            pdf.save("qrcodes-maquinarios.pdf");
-          } catch(erro){
-            console.log("Erro ao gerar PDF:", erro);
-            alert("Não foi possível gerar o PDF.");
-          } finally {
-            botao.disabled = false;
-            botao.textContent = "Baixar PDF";
-          }
-        }
-
-        gerarQRs();
-      <\/script>
-    </body>
-    </html>
-  `;
-
-  const novaJanela = window.open("", "_blank");
-
-  if(!novaJanela){
-    alert("O navegador bloqueou a nova janela. Libere pop-ups para este site.");
-    return;
-  }
-
-  novaJanela.document.open();
-  novaJanela.document.write(html);
-  novaJanela.document.close();
-}
-</script>
-  
-      </body>
-      </html>
-    `;
+    gerarQRs();
+  <\/script>
+</body>
+</html>
+`;
 
     const novaJanela = window.open("", "_blank");
 
