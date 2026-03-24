@@ -68,6 +68,7 @@
       display:flex;
       gap:8px;
       flex-shrink:0;
+      flex-wrap:wrap;
     }
 
     button{
@@ -96,6 +97,16 @@
       color:white;
     }
 
+    .btn-editar{
+      background:#f59e0b;
+      color:white;
+    }
+
+    .btn-apagar{
+      background:#ef4444;
+      color:white;
+    }
+
     .form{
       margin-top:10px;
       margin-bottom:20px;
@@ -107,7 +118,18 @@
       border-radius:12px;
     }
 
-    input, select{
+    .barra-topo{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-bottom:18px;
+    }
+
+    .barra-topo input,
+    .barra-topo select,
+    .form input,
+    .form select{
       padding:10px;
       border-radius:6px;
       border:none;
@@ -148,6 +170,16 @@
 <button class="btn-geral" onclick="gerarTodosQRCodes('DUO HELIÓPOLIS')">QR Codes - Heliópolis</button>
 <button class="btn-geral" onclick="gerarTodosQRCodes('DUO CENTRO')">QR Codes - Centro</button>
 
+<div class="barra-topo">
+  <input id="busca" placeholder="Buscar por nome ou ID..." oninput="carregar()">
+
+  <select id="ordenacao" onchange="carregar()">
+    <option value="nome_asc">Classificar por: Nome A → Z</option>
+    <option value="nome_desc">Classificar por: Nome Z → A</option>
+    <option value="id_asc">Classificar por: ID do maquinário</option>
+  </select>
+</div>
+
 <div class="form" id="form" style="display:none;">
   <select id="unidade">
     <option value="DUO HELIÓPOLIS">DUO HELIÓPOLIS</option>
@@ -171,6 +203,8 @@
     "https://chyomxetiloktyepjbtk.supabase.co",
     "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI"
   );
+
+  const senhaAdmin = "7c9446a1";
 
   function abrirForm(){
     const form = document.getElementById("form");
@@ -212,12 +246,122 @@
     );
   }
 
+  function ordenarLista(lista){
+    const criterio = document.getElementById("ordenacao").value;
+
+    if(criterio === "nome_asc"){
+      return lista.sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+    }
+
+    if(criterio === "nome_desc"){
+      return lista.sort((a, b) => String(b.nome || "").localeCompare(String(a.nome || ""), "pt-BR"));
+    }
+
+    if(criterio === "id_asc"){
+      return lista.sort((a, b) => String(a.maquina_id || "").localeCompare(String(b.maquina_id || ""), "pt-BR", { numeric: true }));
+    }
+
+    return lista;
+  }
+
+  function filtrarLista(lista){
+    const busca = document.getElementById("busca").value.trim().toLowerCase();
+
+    if(!busca) return lista;
+
+    return lista.filter(item => {
+      const nome = String(item.nome || "").toLowerCase();
+      const id = String(item.maquina_id || "").toLowerCase();
+      return nome.includes(busca) || id.includes(busca);
+    });
+  }
+
+  async function editarMaquinario(maquinaId){
+    const senha = prompt("Digite a senha para editar o maquinário:");
+    if(senha !== senhaAdmin){
+      alert("Senha incorreta");
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("maquinarios")
+      .select("*")
+      .eq("maquina_id", maquinaId)
+      .single();
+
+    if(error || !data){
+      console.log("Erro ao buscar maquinário:", error);
+      alert("Não foi possível localizar esse maquinário.");
+      return;
+    }
+
+    const novoNome = prompt("Digite o novo nome da máquina:", data.nome || "");
+    if(novoNome === null) return;
+
+    const novoId = prompt("Digite o novo ID da máquina:", data.maquina_id || "");
+    if(novoId === null) return;
+
+    const novaUnidade = prompt("Digite a unidade (DUO HELIÓPOLIS ou DUO CENTRO):", data.unidade || "");
+    if(novaUnidade === null) return;
+
+    const nomeFinal = novoNome.trim();
+    const idFinal = novoId.trim();
+    const unidadeFinal = novaUnidade.trim();
+
+    if(!nomeFinal || !idFinal || !unidadeFinal){
+      alert("Nenhum campo pode ficar vazio.");
+      return;
+    }
+
+    const { error: updateError } = await supabaseClient
+      .from("maquinarios")
+      .update({
+        nome: nomeFinal,
+        maquina_id: idFinal,
+        unidade: unidadeFinal
+      })
+      .eq("id", data.id);
+
+    if(updateError){
+      console.log("Erro ao editar maquinário:", updateError);
+      alert("Erro ao editar maquinário.");
+      return;
+    }
+
+    alert("Maquinário editado com sucesso.");
+    carregar();
+  }
+
+  async function apagarMaquinario(maquinaId){
+    const senha = prompt("Digite a senha para apagar o maquinário:");
+    if(senha !== senhaAdmin){
+      alert("Senha incorreta");
+      return;
+    }
+
+    const confirmar = confirm(`Tem certeza que deseja apagar o maquinário ${maquinaId}?`);
+    if(!confirmar) return;
+
+    const { error } = await supabaseClient
+      .from("maquinarios")
+      .delete()
+      .eq("maquina_id", maquinaId);
+
+    if(error){
+      console.log("Erro ao apagar maquinário:", error);
+      alert("Erro ao apagar maquinário.");
+      return;
+    }
+
+    alert("Maquinário apagado com sucesso.");
+    carregar();
+  }
+
   async function carregar(){
     const [maquinariosResp, manutencoesResp] = await Promise.all([
       supabaseClient
         .from("maquinarios")
-        .select("*")
-        .order("nome"),
+        .select("*"),
       supabaseClient
         .from("manutencao_academia")
         .select("maquina_id")
@@ -236,8 +380,11 @@
       return;
     }
 
-    const data = maquinariosResp.data || [];
+    let data = maquinariosResp.data || [];
     const problemas = manutencoesResp.data || [];
+
+    data = filtrarLista(data);
+    data = ordenarLista(data);
 
     const contagemAbertos = {};
 
@@ -256,7 +403,7 @@
     const duoCentro = data.filter(m => m.unidade === "DUO CENTRO");
 
     if(heliopolis.length === 0){
-      helio.innerHTML = `<div class="vazio">Nenhum maquinário cadastrado.</div>`;
+      helio.innerHTML = `<div class="vazio">Nenhum maquinário encontrado.</div>`;
     } else {
       heliopolis.forEach(m => {
         const quantidadeAbertos = contagemAbertos[m.maquina_id] || 0;
@@ -274,6 +421,8 @@
           </div>
           <div class="acoes">
             <button class="btn-qr" onclick="gerarQR('${String(m.maquina_id).replace(/'/g, "\\'")}')">QR</button>
+            <button class="btn-editar" onclick="editarMaquinario('${String(m.maquina_id).replace(/'/g, "\\'")}')">Editar</button>
+            <button class="btn-apagar" onclick="apagarMaquinario('${String(m.maquina_id).replace(/'/g, "\\'")}')">Apagar</button>
           </div>
         `;
 
@@ -282,7 +431,7 @@
     }
 
     if(duoCentro.length === 0){
-      centro.innerHTML = `<div class="vazio">Nenhum maquinário cadastrado.</div>`;
+      centro.innerHTML = `<div class="vazio">Nenhum maquinário encontrado.</div>`;
     } else {
       duoCentro.forEach(m => {
         const quantidadeAbertos = contagemAbertos[m.maquina_id] || 0;
@@ -300,6 +449,8 @@
           </div>
           <div class="acoes">
             <button class="btn-qr" onclick="gerarQR('${String(m.maquina_id).replace(/'/g, "\\'")}')">QR</button>
+            <button class="btn-editar" onclick="editarMaquinario('${String(m.maquina_id).replace(/'/g, "\\'")}')">Editar</button>
+            <button class="btn-apagar" onclick="apagarMaquinario('${String(m.maquina_id).replace(/'/g, "\\'")}')">Apagar</button>
           </div>
         `;
 
