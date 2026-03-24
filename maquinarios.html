@@ -306,6 +306,14 @@
     }
   }
 
+  function dividirEmGrupos(lista, tamanho){
+    const grupos = [];
+    for(let i = 0; i < lista.length; i += tamanho){
+      grupos.push(lista.slice(i, i + tamanho));
+    }
+    return grupos;
+  }
+
   async function gerarTodosQRCodes(){
     const { data, error } = await supabaseClient
       .from("maquinarios")
@@ -318,6 +326,8 @@
       console.log(error);
       return;
     }
+
+    const grupos = dividirEmGrupos(data || [], 4);
 
     let html = `
 <!DOCTYPE html>
@@ -382,23 +392,34 @@
       background:#16a34a;
     }
 
-    .pagina{
+    .todas-folhas{
+      display:flex;
+      flex-direction:column;
+      gap:24px;
+      align-items:center;
+    }
+
+    .folha{
+      width:19cm;
+      min-height:27.7cm;
+      background:#ffffff;
+      padding:1cm;
       display:grid;
-      grid-template-columns:repeat(2, 10cm);
-      gap:22px 22px;
+      grid-template-columns:repeat(2, 7cm);
+      grid-template-rows:repeat(2, 10cm);
+      gap:0.8cm 1cm;
       justify-content:center;
+      align-content:start;
+      box-shadow:0 8px 24px rgba(0,0,0,0.10);
     }
 
     .etiqueta{
       width:7cm;
       height:10cm;
       background:linear-gradient(180deg, #020817 0%, #010b1f 100%);
-      border-radius:22px;
-      padding:16px 16px 14px;
+      border-radius:18px;
+      padding:0.35cm;
       color:#fff;
-      box-shadow:0 10px 24px rgba(0,0,0,0.18);
-      page-break-inside:avoid;
-      break-inside:avoid;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -408,26 +429,27 @@
     .topo-etiqueta{
       width:100%;
       background:linear-gradient(90deg, #03143d 0%, #132b63 100%);
-      border-radius:12px;
-      padding:10px 12px;
+      border-radius:10px;
+      padding:0.18cm 0.22cm;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      margin-bottom:20px;
+      margin-bottom:0.28cm;
     }
 
     .id-label{
       color:#1fb6ff;
       font-weight:900;
-      font-size:16px;
+      font-size:12px;
       letter-spacing:0.3px;
     }
 
     .id-valor{
       color:#ffffff;
       font-weight:900;
-      font-size:28px;
+      font-size:24px;
       line-height:1;
+      text-align:right;
     }
 
     .qr-box{
@@ -436,18 +458,18 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      margin-bottom:18px;
+      margin-bottom:0.22cm;
     }
 
     .qr{
-      width:5.6cm;
-      height:5.6cm;
+      width:4.8cm;
+      height:4.8cm;
       background:#ffffff;
-      border-radius:12px;
+      border-radius:10px;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:10px;
+      padding:0.18cm;
       overflow:hidden;
     }
 
@@ -462,16 +484,16 @@
       margin-top:auto;
       width:100%;
       border-top:1px solid rgba(59,130,246,0.22);
-      padding-top:10px;
+      padding-top:0.18cm;
       text-align:left;
       color:#94a3b8;
-      font-size:13px;
+      font-size:11px;
     }
 
     @media print{
       @page{
         size:A4 portrait;
-        margin:10mm;
+        margin:0;
       }
 
       body{
@@ -483,18 +505,22 @@
         display:none;
       }
 
-      .pagina{
-        grid-template-columns:repeat(2, 10cm);
-        gap:18px 18px;
-        justify-content:center;
+      .todas-folhas{
+        gap:0;
       }
 
-      .etiqueta{
-        width:10cm;
-        height:10cm;
+      .folha{
+        width:19cm;
+        min-height:27.7cm;
         box-shadow:none;
-        page-break-inside:avoid;
-        break-inside:avoid;
+        margin:0;
+        page-break-after:always;
+        break-after:page;
+      }
+
+      .folha:last-child{
+        page-break-after:auto;
+        break-after:auto;
       }
     }
   </style>
@@ -509,13 +535,16 @@
     </div>
   </div>
 
-  <div class="pagina" id="areaEtiquetas">
+  <div class="todas-folhas" id="todasFolhas">
 `;
 
-    data.forEach(m => {
-      const url = `${location.origin}/manutencao-academia/maquina.html?id=${encodeURIComponent(m.maquina_id)}`;
+    grupos.forEach(grupo => {
+      html += `<div class="folha">`;
 
-      html += `
+      grupo.forEach(m => {
+        const url = `${location.origin}/manutencao-academia/maquina.html?id=${encodeURIComponent(m.maquina_id)}`;
+
+        html += `
     <div class="etiqueta">
       <div class="topo-etiqueta">
         <div class="id-label">ID</div>
@@ -529,6 +558,14 @@
       <div class="rodape">Escaneie para reportar problemas</div>
     </div>
 `;
+      });
+
+      const faltando = 4 - grupo.length;
+      for(let i = 0; i < faltando; i++){
+        html += `<div style="width:7cm;height:10cm;"></div>`;
+      }
+
+      html += `</div>`;
     });
 
     html += `
@@ -542,15 +579,15 @@
         const url = el.getAttribute("data-url");
         new QRCode(el, {
           text: url,
-          width: 180,
-          height: 180
+          width: 170,
+          height: 170
         });
       });
     }
 
     async function baixarPDF(){
       const botao = document.querySelector(".btn-pdf");
-      const area = document.getElementById("areaEtiquetas");
+      const folhas = Array.from(document.querySelectorAll(".folha"));
 
       try{
         botao.disabled = true;
@@ -558,33 +595,27 @@
 
         await new Promise(resolve => setTimeout(resolve, 700));
 
-        const canvas = await html2canvas(area, {
-          scale: 2,
-          backgroundColor: "#e9e9e9",
-          logging: false
-        });
-
-        const imgData = canvas.toDataURL("image/png");
         const { jsPDF } = window.jspdf;
-
         const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
 
-        const imgWidth = pdfWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        for(let i = 0; i < folhas.length; i++){
+          const folha = folhas[i];
 
-        let heightLeft = imgHeight;
-        let position = 0;
+          const canvas = await html2canvas(folha, {
+            scale: 2,
+            backgroundColor: "#ffffff",
+            logging: false
+          });
 
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
+          const imgData = canvas.toDataURL("image/png");
+          const pdfWidth = 210;
+          const pdfHeight = 297;
 
-        while(heightLeft > 0){
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-          heightLeft -= pdfHeight;
+          if(i > 0){
+            pdf.addPage();
+          }
+
+          pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
         }
 
         pdf.save("qrcodes-maquinarios.pdf");
