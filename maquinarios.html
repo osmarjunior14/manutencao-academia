@@ -144,7 +144,9 @@
 <h1>📋 Maquinários</h1>
 
 <button class="btn-add" onclick="abrirForm()">+ Adicionar Maquinário</button>
-<button class="btn-geral" onclick="gerarTodosQRCodes()">Gerar todos os QR Codes</button>
+<button class="btn-geral" onclick="gerarTodosQRCodes()">Todos os QR Codes</button>
+<button class="btn-geral" onclick="gerarTodosQRCodes('DUO HELIÓPOLIS')">QR Codes - Heliópolis</button>
+<button class="btn-geral" onclick="gerarTodosQRCodes('DUO CENTRO')">QR Codes - Centro</button>
 
 <div class="form" id="form" style="display:none;">
   <select id="unidade">
@@ -314,12 +316,18 @@
     return grupos;
   }
 
-  async function gerarTodosQRCodes(){
-    const { data, error } = await supabaseClient
+  async function gerarTodosQRCodes(unidadeFiltro = null){
+    let query = supabaseClient
       .from("maquinarios")
       .select("*")
       .order("unidade")
       .order("nome");
+
+    if(unidadeFiltro){
+      query = query.eq("unidade", unidadeFiltro);
+    }
+
+    const { data, error } = await query;
 
     if(error){
       alert("Erro ao carregar maquinários para gerar os QR Codes.");
@@ -327,7 +335,16 @@
       return;
     }
 
-    const grupos = dividirEmGrupos(data || [], 4);
+    if(!data || data.length === 0){
+      alert("Nenhum maquinário encontrado para essa unidade.");
+      return;
+    }
+
+    const grupos = dividirEmGrupos(data, 4);
+    const tituloPagina = unidadeFiltro ? `QR Codes - ${unidadeFiltro}` : "Todos os QR Codes";
+    const nomeArquivo = unidadeFiltro
+      ? `qrcodes-${unidadeFiltro.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-")}.pdf`
+      : "qrcodes-maquinarios.pdf";
 
     let html = `
 <!DOCTYPE html>
@@ -335,7 +352,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Todos os QR Codes</title>
+  <title>${tituloPagina}</title>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"><\/script>
@@ -547,7 +564,7 @@
 </head>
 <body>
   <div class="topo">
-    <h1>Todos os QR Codes</h1>
+    <h1>${tituloPagina}</h1>
 
     <div class="topo-botoes">
       <button class="btn-pdf" onclick="baixarPDF()">Baixar PDF</button>
@@ -657,7 +674,7 @@
           pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
         }
 
-        pdf.save("qrcodes-maquinarios.pdf");
+        pdf.save("${nomeArquivo}");
       } catch(erro){
         console.log("Erro ao gerar PDF:", erro);
         alert("Não foi possível gerar o PDF.");
