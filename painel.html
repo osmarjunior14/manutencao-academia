@@ -9,6 +9,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+
+    .topo-maquina{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+}
+
+.foto-maquina-painel{
+  width:72px;
+  height:72px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid #dbe4f0;
+  background:#f8fafc;
+  flex-shrink:0;
+  box-shadow:0 4px 10px rgba(0,0,0,0.06);
+}
+    
     :root{
       --bg-1:#eef4ff;
       --bg-2:#f7faff;
@@ -614,6 +632,8 @@ if(modoPainel === "gestao"){
     window.location.href = "./login.html";
   }
 } 
+
+  
   const supabaseUrl = "https://chyomxetiloktyepjbtk.supabase.co";
   const supabaseKey = "sb_publishable_ZuuKIqmGotY08ZepHonxHg_3IOjs6pI";
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -933,6 +953,7 @@ if(modoPainel === "gestao"){
     dadosFiltrados.forEach(item => {
       const nome = obterNomeMaquina(item.maquina_id);
       const maquina = nome + " - " + item.maquina_id;
+      const fotoUrl = obterFotoMaquina(item.maquina_id);
 
       const statusNormalizado = String(item.status || "").trim().toLowerCase();
       const estaResolvido = statusNormalizado === "resolvido";
@@ -976,8 +997,18 @@ if(modoPainel === "gestao"){
         <div class="card mb-3 shadow ${estaAberto ? "card-maquina" : "card-resolvido"} ${classeExtra}">
           <div class="card-body">
             ${criticaHtml}
-            <h5 class="titulo-maquina" onclick="abrirHistoricoMaquina('${item.maquina_id}')">${maquina}</h5>
-            ${tipoProblemaHtml}
+<div class="topo-maquina">
+  <img
+    src="${fotoUrl}"
+    alt="${maquina}"
+    class="foto-maquina-painel"
+    onerror="this.style.display='none'"
+  >
+  <div style="flex:1;">
+    <h5 class="titulo-maquina" onclick="abrirHistoricoMaquina('${item.maquina_id}')">${maquina}</h5>
+    ${tipoProblemaHtml}
+  </div>
+</div>
             ${descricaoHtml}
             <small>${formatarDataBonita(item.data)}</small>
             <div class="status-texto">${statusHtml}</div>
@@ -1176,6 +1207,7 @@ if(modoPainel === "gestao"){
   function abrirHistoricoMaquina(maquinaId){
     const nomeMaquina = obterNomeMaquina(maquinaId);
     const titulo = `${nomeMaquina} - ${maquinaId}`;
+    const fotoUrl = obterFotoMaquina(maquinaId);
     const conteudo = document.getElementById("conteudoHistorico");
     const tituloEl = document.getElementById("tituloHistorico");
 
@@ -1183,7 +1215,17 @@ if(modoPainel === "gestao"){
       .filter(item => String(item.maquina_id) === String(maquinaId))
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
-    tituloEl.textContent = titulo;
+    tituloEl.innerHTML = `
+  <div style="display:flex; align-items:center; gap:12px;">
+    <img
+      src="${fotoUrl}"
+      alt="${titulo}"
+      class="foto-maquina-painel"
+      onerror="this.style.display='none'"
+    >
+    <div>${titulo}</div>
+  </div>
+`;
 
     if(registros.length === 0){
       conteudo.innerHTML = `<div class="vazio">Nenhum histórico encontrado para esta máquina.</div>`;
@@ -1256,6 +1298,12 @@ if(modoPainel === "gestao"){
       }
     )
     .subscribe();
+  
+  function obterFotoMaquina(id){
+  const nomeArquivo = `${String(id)}.jpg`;
+  return `https://chyomxetiloktyepjbtk.supabase.co/storage/v1/object/public/maquinas/${nomeArquivo}`;
+}
+  
 </script>
 
 </body>
