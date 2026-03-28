@@ -16,6 +16,50 @@
   gap:14px;
 }
 
+    .modal-foto-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.72);
+  z-index:10000;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.modal-foto-box{
+  position:relative;
+  max-width:95vw;
+  max-height:95vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-foto-img{
+  max-width:95vw;
+  max-height:90vh;
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  background:#fff;
+}
+
+.btn-fechar-foto{
+  position:absolute;
+  top:-12px;
+  right:-12px;
+  width:42px;
+  height:42px;
+  border:none;
+  border-radius:999px;
+  background:#fff;
+  color:#111827;
+  font-size:24px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+
 .foto-maquina-painel{
   width:72px;
   height:72px;
@@ -25,6 +69,13 @@
   background:#f8fafc;
   flex-shrink:0;
   box-shadow:0 4px 10px rgba(0,0,0,0.06);
+  cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.foto-maquina-painel:hover{
+  transform:scale(1.03);
+  box-shadow:0 8px 18px rgba(0,0,0,0.12);
 }
     
     :root{
@@ -618,6 +669,34 @@
 </div>
 
 <script>
+  function abrirModalFoto(url){
+  const overlay = document.getElementById("modalFotoOverlay");
+  const img = document.getElementById("modalFotoImg");
+
+  img.src = url;
+  overlay.style.display = "flex";
+}
+
+function fecharModalFoto(){
+  const overlay = document.getElementById("modalFotoOverlay");
+  const img = document.getElementById("modalFotoImg");
+
+  overlay.style.display = "none";
+  img.src = "";
+}
+
+window.addEventListener("DOMContentLoaded", function(){
+  const overlayFoto = document.getElementById("modalFotoOverlay");
+
+  if(overlayFoto){
+    overlayFoto.addEventListener("click", function(e){
+      if(e.target.id === "modalFotoOverlay"){
+        fecharModalFoto();
+      }
+    });
+  }
+});
+  
   const senhaAdmin = "7c9446a1";
   const senhaResolver = "oud4123";
 
@@ -999,11 +1078,12 @@ if(modoPainel === "gestao"){
             ${criticaHtml}
 <div class="topo-maquina">
   <img
-    src="${fotoUrl}"
-    alt="${maquina}"
-    class="foto-maquina-painel"
-    onerror="this.style.display='none'"
-  >
+  src="${fotoUrl}"
+  alt="${maquina}"
+  class="foto-maquina-painel"
+  onclick="abrirModalFoto('${fotoUrl}')"
+  onerror="this.style.display='none'"
+>
   <div style="flex:1;">
     <h5 class="titulo-maquina" onclick="abrirHistoricoMaquina('${item.maquina_id}')">${maquina}</h5>
     ${tipoProblemaHtml}
@@ -1218,11 +1298,12 @@ if(modoPainel === "gestao"){
     tituloEl.innerHTML = `
   <div style="display:flex; align-items:center; gap:12px;">
     <img
-      src="${fotoUrl}"
-      alt="${titulo}"
-      class="foto-maquina-painel"
-      onerror="this.style.display='none'"
-    >
+  src="${fotoUrl}"
+  alt="${titulo}"
+  class="foto-maquina-painel"
+  onclick="abrirModalFoto('${fotoUrl}')"
+  onerror="this.style.display='none'"
+>
     <div>${titulo}</div>
   </div>
 `;
@@ -1305,6 +1386,13 @@ if(modoPainel === "gestao"){
 }
   
 </script>
-
+  
+<div id="modalFotoOverlay" class="modal-foto-overlay">
+  <div class="modal-foto-box">
+    <button class="btn-fechar-foto" onclick="fecharModalFoto()">×</button>
+    <img id="modalFotoImg" class="modal-foto-img" src="" alt="Foto do maquinário">
+  </div>
+</div>
+  
 </body>
 </html>
